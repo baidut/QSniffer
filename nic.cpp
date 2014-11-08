@@ -6,6 +6,10 @@
  * error in pcap_setfilter  :Error setting the filter.
  */
 
+Nic::~Nic(){
+    this-> close();
+}
+
 bool Nic::open(){
     this-> adhandle = pcap_open_live(
                                 this-> name,            // 设备名
@@ -26,8 +30,12 @@ bool Nic::close(){
     return true;
 }
 
-void Nic::startCaptue(){
+void Nic::startCapture(){
     pcap_loop(this-> adhandle, 0 ,this-> packet_handler,NULL);
+}
+
+void Nic::stopCapture(){
+    pcap_breakloop(this-> adhandle);
 }
 
 bool Nic::sendPackage(u_char* content){

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "qsniffer.h" //隐藏内部结构，只做类的声明
+#include <QMessageBox>
 
 // 主窗口只能打开一个实例的话，可以将qs放在外部，这样可以隐藏qs，但显然不合适
 /*
@@ -32,3 +33,25 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+void MainWindow::on_pushButton_start_clicked(bool checked)
+{
+    if(checked){ // started
+        ui->pushButton_start->setText("Stop");
+        ui->tabWidget_main->setCurrentIndex(1);
+
+        int         i = 0;
+        QListWidgetItem* item;
+        for(i=0; ( item = ui->listWidget_dev->item(i) );i++){
+           if( (item->isSelected()) ){
+              qs->grabDevice(i);
+           }
+        }
+        //qs->setActionOnCaptured(showList);
+        qs->startCapture();
+    }
+    else{
+        ui->pushButton_start->setText("Start");
+        qs->stopCapture();
+    }
+}

@@ -3,6 +3,7 @@
 
 #include "nic.h"
 #include <QStringList>
+#include <QVector> //  error: field 'nic_list' has incomplete type
 
 /* e.g.
  * QSniffer qs = QSniffer();
@@ -24,11 +25,20 @@ public:
     QStringList& getDeviceList(){
         return *(this-> dev_list);
     }
-    Nic& getDevice(int index);
+    // 用于对单个网卡的操作
+    Nic *getDevice(int index);
+    // 用于配量操作
+    bool grabDevice(int index);
+    bool releaseDevice(int index);
+    void startCapture();
+    void stopCapture();
+    void setActionOnCaptured(pcap_handler handler_function);
+
 private:
-    pcap_if_t*      alldevs;
+
+    QVector<Nic*>   nic_list;   // 为了便于维护，对应各个设备的指针，为空时设备未激活
+    pcap_if_t*      alldevs;    // 所有可用的设备列表
     QStringList*    dev_list;   // 列表可能为空，改为指针比较好
-    QList<Nic*>     active_nic; // 维护需要工作的网卡
     char            errbuf[PCAP_ERRBUF_SIZE+1];
 };
 
