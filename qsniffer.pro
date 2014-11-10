@@ -15,11 +15,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     qsniffer.cpp \
-    nic.cpp
+    nic.cpp \
+    pkt.cpp
 
 HEADERS  += mainwindow.h \
     qsniffer.h \
-    nic.h
+    nic.h \
+    pkt.h
 
 FORMS    += mainwindow.ui
 

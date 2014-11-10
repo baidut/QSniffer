@@ -1,10 +1,14 @@
+
 #include "nic.h"
+#include "pkt.h"
 
 /* \ERROR                   \DESCRIPTION
  * description == NULL      :No description available.
  * error in pcap_compile    :Unable to compile the packet filter. Check the syntax.
  * error in pcap_setfilter  :Error setting the filter.
  */
+
+void packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data);
 
 Nic::~Nic(){
     this-> close();
@@ -31,7 +35,8 @@ bool Nic::close(){
 }
 
 void Nic::startCapture(){
-    pcap_loop(this-> adhandle, 0 ,this-> packet_handler,NULL);
+    pcap_loop(this-> adhandle, 0 ,packet_handler, (u_char*) this);
+    // user 参数标识是来自哪个网卡的等等信息
 }
 
 void Nic::stopCapture(){
@@ -65,3 +70,14 @@ bool Nic::setFilter(char* filter, int optimize = 1){  //"tcp"
     }
     return true;
 }
+
+// 一个对于所有Nic类都相同的处理函数，为了向外部封装包接收回调函数结构
+// 相当于一个分发包工具，先注册设备号，之后按照设备号领取对应的包处理函数(不同设备的包处理函数可以不同)
+void packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data){
+    Nic* nic = (Nic*) param;                    // 提取出对应的设备指针
+    Pkt* pkt = new Pkt((struct pcap_pkthdr *)header,(u_char *)pkt_data,nic);    // 新建数据包的一个实例
+    //*(nic->on_captured) (pkt);                  // 调用对应的包处理函数
+    // 有数据重组和交付设备的代价，但便于处理
+}
+
+

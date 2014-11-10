@@ -47,11 +47,18 @@ void MainWindow::on_pushButton_start_clicked(bool checked)
               qs->grabDevice(i);
            }
         }
-        //qs->setActionOnCaptured(showList);
+        // qs->setActionOnCaptured(dumpPacket);
+        // 类的成员函数需要转为普通函数才行 友元可以直接调用？
+        // 解决方法：信号槽传递数据包
         qs->startCapture();
     }
     else{
         ui->pushButton_start->setText("Start");
         qs->stopCapture();
     }
+}
+
+void MainWindow::on_package_captured(Pkt* pkt){
+    //sprintf
+    ui->textBrowser_pkt->append("packet captured!");
 }

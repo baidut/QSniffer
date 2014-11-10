@@ -3,10 +3,13 @@
 
 #include <QMainWindow>
 // #include "qsniffer.h" 隐藏内部结构，只做类的声明
-#include "nic.h" // 回调函数类型无需声明 按照类型即可 但这里相关结构较复杂 如不这么做需重新定义结构，解决办法2：封装包结构
+// #include "nic.h" // 回调函数类型无需声明 按照类型即可 但这里相关结构较复杂 如不这么做需重新定义结构，解决办法2：封装包结构
 
 /* 要做好隔离，底层相关复杂的数据结构都封装成类，交给外部的类来操作！
  */
+
+class Pkt;
+class Nic;
 class QSniffer;
 
 namespace Ui {
@@ -21,10 +24,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    //void dumpPacket(u_char *param,const struct pcap_pkthdr *header, const u_char *pkt_data);
+    //void dumpPacket(Pkt* pkt);
+    //void dumpPacket(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data);
+    friend class Nic;
 
 private slots:
     void on_pushButton_start_clicked(bool checked);
+    void on_package_captured(Pkt* pkt);
 
 private:
     Ui::MainWindow *ui;

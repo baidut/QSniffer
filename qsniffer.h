@@ -30,9 +30,11 @@ public:
     // 用于配量操作
     bool grabDevice(int index);
     bool releaseDevice(int index);
+    void setFilter(char *filter, int optimize);
     void startCapture();
     void stopCapture();
-    void setActionOnCaptured(pcap_handler handler_function);
+    void setActionOnCaptured(pkt_handler handler_function); // 封装后的包处理函数
+    void setActionOnCaptured(pcap_handler handler_function); // 也可以不通过分发，直接设置
 
 private:
 

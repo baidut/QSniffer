@@ -23,6 +23,10 @@
  * 相当于网卡驱动,对外部隐藏了winpcap
  * 为了提高可移植性，建议不用Qt的数据结构
  */
+class Pkt;
+
+typedef void (*pkt_handler)(Pkt*);
+
 class Nic{
 public:
     Nic(pcap_if_t* dev){
@@ -45,7 +49,8 @@ public:
     int     mode;
     int     max_length;
     int     max_timeout;
-    pcap_handler packet_handler; // 包接收触发函数
+    pkt_handler  on_captured; // pcap_handler: new Packet, call on_captured function;
+    pcap_handler packet_handler; // 包接收触发函数 默认为分发器
 
 private:
     char*   name;
