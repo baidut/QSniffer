@@ -17,11 +17,19 @@ dev.setFilter("tcp");
 dev.startCaptue();
 */
 
+// 仅声明不行class CaptureThread;  invalid use of incomplete type struct 或者是class的解决办法 http://blog.csdn.net/fangyuanseu/article/details/18090149
+// error: invalid use of incomplete type 'class CaptureThread'
+#include "capturethread.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    CaptureThread* cap = new CaptureThread(1); // ,(QObject*)this
+    connect(cap,SIGNAL(captured(int,Packet*)),this,SLOT(on_package_captured(int,Packet*)));
+    cap->start();
 
     /*this->qs = new QSniffer;
     QStringList dev_list = this->qs->getDeviceList();
@@ -64,6 +72,12 @@ void MainWindow::on_package_captured(Pkt* pkt){
     ui->textBrowser_pkt->append("packet captured!");
     // delete pkt;// 否则内存。。。。
 }
+
+void MainWindow::on_package_captured(int id,Packet* pkt){
+    ui->textBrowser_test->append(QString("%1 captured : %2").arg(id).arg(pkt->data));
+    delete pkt;
+}
+
 
 void MainWindow::on_pushButton_captureOptions_clicked()
 {
