@@ -2,22 +2,24 @@
 #include "qsniffer.h"
 #include "nic.h"
 
-QSniffer::QSniffer(){
+
+QSniffer::QSniffer(QObject* parent): QObject(parent){
     this-> dev_list = new QStringList;
     /* 获取本机网络设备列表 */
     pcap_if_t* d;
 
-    if (pcap_findalldevs_ex("rpcap://", NULL, &alldevs, errbuf) != -1){
-    // 问题1：不兼容，为remote-ext.h中函数 问题2：errbuf warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
-        /* 初始化网络设备列表，已提供用户选择 */
-        // int i = 0;
-        for(d=alldevs; d; d=d->next){
-            *(this-> dev_list) << ( d->name );
-            nic_list.append(NULL);//nic_list[i] = NULL;i++;
-        }
-        // dev_list == NULL :No interfaces found! Make sure WinPcap is installed.
+    if(pcap_findalldevs(&alldevs, errbuf) == -1){
+        sprintf(errbuf,"Error in pcap_findalldevs: %s\n",errbuf);
+        return;
     }
-    //return nullptr;//fprintf(stderr,"Error in pcap_findalldevs: %s\n", errbuf);
+    for(d=alldevs; d; d=d->next){
+        *(this-> dev_list) << ( d->name );
+        nic_list.append(NULL);//nic_list[i] = NULL;i++;
+    }
+    if(d==alldevs){
+        sprintf(errbuf,"No interfaces found! Make sure WinPcap is installed");
+        return; // 使用设备时触发错误，返回出错信息
+    }
 }
 
 QSniffer::~QSniffer(){
@@ -26,11 +28,12 @@ QSniffer::~QSniffer(){
 
 Nic* QSniffer::getDevice(int index){
     if(nic_list[index]) return nic_list[index];
-    pcap_if_t *d;
+    return NULL; // 没有创建则返回空
+    /*pcap_if_t *d;
     int i;
     for(d=alldevs, i=0; i< index-1 ;d=d->next, i++);
     Nic* nic = new Nic(d);
-    return nic;
+    return nic;*/
 }
 
 bool QSniffer::grabDevice(int index){

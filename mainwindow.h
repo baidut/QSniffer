@@ -20,17 +20,24 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+friend class QSniffer;
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
     //void dumpPacket(Pkt* pkt);
     //void dumpPacket(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data);
-    friend class Nic;
+    //friend class Nic;
+signals:
+    void shutdown();
+
+public slots:
+    void on_package_captured(Pkt* pkt);
 
 private slots:
     void on_pushButton_start_clicked(bool checked);
-    void on_package_captured(Pkt* pkt);
+
+    void on_pushButton_captureOptions_clicked();
 
 private:
     Ui::MainWindow *ui;

@@ -4,6 +4,7 @@
 #include "nic.h"
 #include <QStringList>
 #include <QVector> //  error: field 'nic_list' has incomplete type
+#include <QObject>
 
 /* e.g.
  * QSniffer qs = QSniffer();
@@ -16,12 +17,19 @@
  * dev.startCaptue();
  */
 
+
+class MainWindow;
+
 // 可以捕捉多个设备,创建多个设备，同时开始捕捉
-class QSniffer // 不做设备的驱动，完成更高层的应用，目前还没有什么内容
-{
+// 不做设备的驱动，完成更高层的应用，目前还没有什么内容
+class QSniffer :public QObject {
+
+    Q_OBJECT
+
 public:
-    QSniffer();
+    explicit QSniffer(QObject* parent = 0); ;
     ~QSniffer();
+
     QStringList& getDeviceList(){
         return *(this-> dev_list);
     }

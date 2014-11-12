@@ -3,6 +3,8 @@
 
 #include "qsniffer.h" //隐藏内部结构，只做类的声明
 #include <QMessageBox>
+#include <QString>
+
 
 // 主窗口只能打开一个实例的话，可以将qs放在外部，这样可以隐藏qs，但显然不合适
 /*
@@ -20,12 +22,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->qs = new QSniffer;
+
+    /*this->qs = new QSniffer;
     QStringList dev_list = this->qs->getDeviceList();
-/* 原来是只打开一个设备 采用comboBox选择 添加多选设备支持后，改成了可以多选的列表
-    ui->comboBox_dev->addItems(dev_list);
-*/
-    ui->listWidget_dev->addItems(dev_list);
+    ui->listWidget_dev->addItems(dev_list);*/
 }
 
 MainWindow::~MainWindow()
@@ -45,11 +45,12 @@ void MainWindow::on_pushButton_start_clicked(bool checked)
         for(i=0; ( item = ui->listWidget_dev->item(i) );i++){
            if( (item->isSelected()) ){
               qs->grabDevice(i);
+              if(qs->getDevice(i))
+                connect( qs->getDevice(i),SIGNAL(captured(Pkt*)),this,SLOT(on_package_captured(Pkt*)));
            }
         }
-        // qs->setActionOnCaptured(dumpPacket);
-        // 类的成员函数需要转为普通函数才行 友元可以直接调用？
-        // 解决方法：信号槽传递数据包
+        QMessageBox::information(NULL, "Title",  "hahha" , QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
         qs->startCapture();
     }
     else{
@@ -61,4 +62,10 @@ void MainWindow::on_pushButton_start_clicked(bool checked)
 void MainWindow::on_package_captured(Pkt* pkt){
     //sprintf
     ui->textBrowser_pkt->append("packet captured!");
+    // delete pkt;// 否则内存。。。。
+}
+
+void MainWindow::on_pushButton_captureOptions_clicked()
+{
+    emit shutdown();
 }

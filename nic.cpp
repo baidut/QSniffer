@@ -1,4 +1,6 @@
 
+
+#include <QMessageBox>
 #include "nic.h"
 #include "pkt.h"
 
@@ -8,10 +10,22 @@
  * error in pcap_setfilter  :Error setting the filter.
  */
 
-void packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data);
+void dflt_packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data);
 
 Nic::~Nic(){
     this-> close();
+}
+
+Nic::Nic(pcap_if_t* dev,QObject *parent):QObject(parent){
+    this-> dev = dev;
+
+    this->name = dev->name;
+    max_length = 65536;
+    mode = PCAP_OPENFLAG_PROMISCUOUS;
+    max_timeout = 1000;
+
+    if(this->open())
+        QMessageBox::about(NULL, "OK", "Open OK!");
 }
 
 bool Nic::open(){
@@ -35,7 +49,10 @@ bool Nic::close(){
 }
 
 void Nic::startCapture(){
-    pcap_loop(this-> adhandle, 0 ,packet_handler, (u_char*) this);
+    if( this->setFilter("tcp") )
+        QMessageBox::about(NULL, "OK", "Open OK!");
+    // 设备未打开 this-> adhandle == NULL
+    pcap_loop(this-> adhandle, 0 ,dflt_packet_handler, NULL); // (u_char*) this
     // user 参数标识是来自哪个网卡的等等信息
 }
 
@@ -51,8 +68,15 @@ bool Nic::sendPackage(u_char* content){
     return true;
 }
 
-bool Nic::setFilter(char* filter, int optimize = 1){  //"tcp"
+bool Nic::setFilter(const char* filter, int optimize){  //"tcp"
     u_int netmask;
+
+    /* Check the link layer. We support only Ethernet for simplicity. */
+    if(pcap_datalink(adhandle) != DLT_EN10MB){
+        // fprintf(stderr,"\nThis program works only on Ethernet networks.\n");
+        return false;
+    }
+
 
     if (this-> dev-> addresses != NULL)
         /* 获取接口第一个地址的掩码 */
@@ -73,11 +97,16 @@ bool Nic::setFilter(char* filter, int optimize = 1){  //"tcp"
 
 // 一个对于所有Nic类都相同的处理函数，为了向外部封装包接收回调函数结构
 // 相当于一个分发包工具，先注册设备号，之后按照设备号领取对应的包处理函数(不同设备的包处理函数可以不同)
-void packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data){
-    Nic* nic = (Nic*) param;                    // 提取出对应的设备指针
-    Pkt* pkt = new Pkt((struct pcap_pkthdr *)header,(u_char *)pkt_data,nic);    // 新建数据包的一个实例
+void dflt_packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data){
+    // Nic* nic = (Nic*) param;                    // 提取出对应的设备指针
+    // Pkt* pkt = new Pkt((struct pcap_pkthdr *)header,(u_char *)pkt_data,nic);    // 新建数据包的一个实例
     //*(nic->on_captured) (pkt);                  // 调用对应的包处理函数
+    // emit nic->captured(pkt);
     // 有数据重组和交付设备的代价，但便于处理
 }
 
+// connect(nic,SINGAL(captured(pkt)),&w,on_package_captured(pkt));
+// 必须让主界面类自己做 connect(nic,SINGAL(captured(pkt)),this,on_package_captured(pkt));
+// 可以根据不同nic的信号进行不同槽的处理
+// foreach (active_nic) connect...
 

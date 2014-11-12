@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     qsniffer.cpp \
     nic.cpp \
-    pkt.cpp
+    pkt.cpp \
+    capturethread.cpp
 
 HEADERS  += mainwindow.h \
     qsniffer.h \
     nic.h \
-    pkt.h
+    pkt.h \
+    capturethread.h
 
 FORMS    += mainwindow.ui
 
