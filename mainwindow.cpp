@@ -27,9 +27,17 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    CaptureThread* cap = new CaptureThread(1); // ,(QObject*)this
-    connect(cap,SIGNAL(captured(int,Packet*)),this,SLOT(on_package_captured(int,Packet*)));
-    cap->start();
+CaptureThread*  cap[6];
+    for(int i = 0;i<5;i++){
+        cap[i] = new CaptureThread(i); // ,(QObject*)this
+        connect(cap[i],SIGNAL(captured(int,Packet*)),this,SLOT(on_package_captured(int,Packet*)));
+
+    }
+    for(int i = 0;i<5;i++){
+       cap[i]->start();
+    }
+
+
 
     /*this->qs = new QSniffer;
     QStringList dev_list = this->qs->getDeviceList();

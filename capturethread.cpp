@@ -13,6 +13,8 @@ void CaptureThread::run(){
 
     for (int i = 0; i < 5; i++){
         Packet* pkt = new Packet(i);
+        for(int j=0;j<10000;j++)
+            for(int k=0;k<10000;k++);//delay 让进程乱序更加明显
         emit captured(id,pkt);
     }
 }
