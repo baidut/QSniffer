@@ -1,7 +1,7 @@
 
 #include "qsniffer.h"
 #include "nic.h"
-
+#include "capturethread.h"
 
 QSniffer::QSniffer(QObject* parent): QObject(parent){
     this-> dev_list = new QStringList;
@@ -15,6 +15,7 @@ QSniffer::QSniffer(QObject* parent): QObject(parent){
     for(d=alldevs; d; d=d->next){
         *(this-> dev_list) << ( d->name );
         nic_list.append(NULL);//nic_list[i] = NULL;i++;
+        capThread_list.append(NULL);
     }
     if(d==alldevs){
         sprintf(errbuf,"No interfaces found! Make sure WinPcap is installed");
@@ -24,27 +25,47 @@ QSniffer::QSniffer(QObject* parent): QObject(parent){
 
 QSniffer::~QSniffer(){
     pcap_freealldevs(this-> alldevs);
+    for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
+        this->releaseDevice(i);
+    }
+}
+
+void QSniffer::startCapThread(){
+    for(int i = 0; i< capThread_list.size(); i++)if(capThread_list[i]){
+        capThread_list[i]->start();
+    }
+}
+
+void QSniffer::stopCapThread(){
+    for(int i = 0; i< capThread_list.size(); i++)if(capThread_list[i]){
+        delete capThread_list[i];
+    }
 }
 
 Nic* QSniffer::getDevice(int index){
     if(nic_list[index]) return nic_list[index];
-    return NULL; // 没有创建则返回空
-    /*pcap_if_t *d;
-    int i;
-    for(d=alldevs, i=0; i< index-1 ;d=d->next, i++);
-    Nic* nic = new Nic(d);
-    return nic;*/
+    else return NULL; // 没有创建则返回空，并不执行创建
+}
+
+CaptureThread* QSniffer::getCaptureThread(int index){
+    if(capThread_list[index]) return capThread_list[index];
+    else return NULL; // 没有创建则返回空
 }
 
 bool QSniffer::grabDevice(int index){
-    // 需添加检查设备是否已经激活
+    // 设备已经激活
     if( this->nic_list[index] ) return false;
     pcap_if_t *d=alldevs;
     int i = 0;
     for(;i< index-1;d=d->next, i++);
     Nic* nic = new Nic(d);
-    if(nic == NULL) return false;
+    // 设备创建失败
+    Q_ASSERT(nic != NULL);
     this->nic_list[index] = nic;
+    // 创建接收线程
+    CaptureThread* capThread = new CaptureThread(nic);
+    Q_ASSERT(capThread != NULL);
+    this->capThread_list[index]=capThread;
     return true;
 }
 

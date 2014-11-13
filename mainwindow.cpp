@@ -26,22 +26,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-CaptureThread*  cap[6];
-    for(int i = 0;i<5;i++){
-        cap[i] = new CaptureThread(i); // ,(QObject*)this
-        connect(cap[i],SIGNAL(captured(int,Packet*)),this,SLOT(on_package_captured(int,Packet*)));
-
-    }
-    for(int i = 0;i<5;i++){
-       cap[i]->start();
-    }
-
-
-
-    /*this->qs = new QSniffer;
+    this->qs = new QSniffer;
     QStringList dev_list = this->qs->getDeviceList();
-    ui->listWidget_dev->addItems(dev_list);*/
+    ui->listWidget_dev->addItems(dev_list);
 }
 
 MainWindow::~MainWindow()
@@ -61,31 +48,25 @@ void MainWindow::on_pushButton_start_clicked(bool checked)
         for(i=0; ( item = ui->listWidget_dev->item(i) );i++){
            if( (item->isSelected()) ){
               qs->grabDevice(i);
-              if(qs->getDevice(i))
-                connect( qs->getDevice(i),SIGNAL(captured(Pkt*)),this,SLOT(on_package_captured(Pkt*)));
+              CaptureThread* capThread = qs->getCaptureThread(i);
+              Q_ASSERT(capThread!=NULL);
+              connect(capThread,SIGNAL(captured(Pkt*)),this,SLOT(on_package_captured(Pkt*)));
            }
         }
         QMessageBox::information(NULL, "Title",  "hahha" , QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-
-        qs->startCapture();
+        qs->startCapThread();
     }
     else{
         ui->pushButton_start->setText("Start");
-        qs->stopCapture();
+        qs->stopCapThread();
     }
 }
 
 void MainWindow::on_package_captured(Pkt* pkt){
     //sprintf
     ui->textBrowser_pkt->append("packet captured!");
-    // delete pkt;// 否则内存。。。。
+    delete pkt;// 否则内存。。。。
 }
-
-void MainWindow::on_package_captured(int id,Packet* pkt){
-    ui->textBrowser_test->append(QString("%1 captured : %2").arg(id).arg(pkt->data));
-    delete pkt;
-}
-
 
 void MainWindow::on_pushButton_captureOptions_clicked()
 {

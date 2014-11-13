@@ -40,7 +40,7 @@ public:
     bool    close();
     void    startCapture(); // 不可用
     void    stopCapture(); // 不可用
-    Pkt     getNextPacket(); // 获取 多个设备，依次尝试获取数据包
+    Pkt*    getNextPacket(); // 获取数据包
 
     int     getStatus();
 

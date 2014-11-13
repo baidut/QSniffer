@@ -34,7 +34,6 @@ signals:
 
 public slots:
     void on_package_captured(Pkt* pkt);
-    void on_package_captured(int id,Packet* pkt);
 
 private slots:
     void on_pushButton_start_clicked(bool checked);

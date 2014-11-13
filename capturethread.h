@@ -1,10 +1,11 @@
 #ifndef CAPTURETHREAD_H
 #define CAPTURETHREAD_H
 
-#include <QThread>
+#include <QThread> // 线程解决多设备采集问题
+#include <QMutex> // 信号量pause解决线程死循环停止、继续。终止变量break处理跳出问题：终止变量置为1，等待执行结束
 
 class Nic;
-class Pkt;
+class Pkt; // 采集线程不知道数据包的结构和操作，相关处理由Nic进行，它只是将包传送到主窗口
 class Packet;
 
 class Packet{
@@ -22,18 +23,28 @@ public:
     /*explicit CaptureThread(int id,QObject *parent = 0): QThread(parent){
         this->id = id;
     }*/
-    CaptureThread(int id){
-        this->id = id;
+    CaptureThread(Nic* nic){
+        this->nic = nic;
+        isBreak = false;
     }
-
+    ~CaptureThread();
 protected:
      void run();
+     void lock(){
+         this->pause.lock();
+     }
+     void unlock(){
+         this->pause.unlock();
+     }
+     void breakloop(){
+         isBreak = true;
+     }
 private:
      Nic* nic;
-     int id;
-
+     QMutex pause;
+     bool isBreak;
 signals:
-     void captured(int id,Packet* packet);
+     void captured(Pkt* packet);
 };
 
 #endif // CAPTURETHREAD_H
