@@ -27,5 +27,10 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui
 
+
+# ntohs ntohl ws2_32.lib
+# LIBS += WS2_32.LIB
+LIBS += -lWs2_32
+
 LIBS += E:\Sniffer\sniffer_module_test\Packet.lib
 LIBS += E:\Sniffer\sniffer_module_test\wpcap.lib

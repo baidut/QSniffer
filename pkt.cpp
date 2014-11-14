@@ -1,6 +1,7 @@
 
 #include "pkt.h"
 #include <QByteArray>
+#include <winsock2.h> // ntohs
 
 // Mac头部（14字节）
 typedef struct {
@@ -26,8 +27,9 @@ typedef struct ip_address
     u_char  byte3;
     u_char  byte4;
 }ip_address;
+
 /* IPv4 header */
-typedef struct ip_header
+typedef struct ipv4_header
 {
     u_char	ver_ihl;		// Version (4 bits) + Internet header length (4 bits)
     u_char	tos;			// Type of service
@@ -42,6 +44,61 @@ typedef struct ip_header
     u_int	op_pad;			// Option + Padding
 }ip_header;
 
+
+// IP 协议头 协议(Protocol) 字段标识含义
+//      协议      协议号
+
+#define IP_SIG			(0)
+#define ICMP_SIG		(1)
+#define IGMP_SIG		(2)
+#define GGP_SIG			(3)
+#define IP_ENCAP_SIG	(4)
+#define ST_SIG			(5)
+#define TCP_SIG			(6)
+#define EGP_SIG			(8)
+#define PUP_SIG			(12)
+#define UDP_SIG			(17)
+#define HMP_SIG			(20)
+#define XNS_IDP_SIG		(22)
+#define RDP_SIG			(27)
+#define TP4_SIG			(29)
+#define XTP_SIG			(36)
+#define DDP_SIG			(37)
+#define IDPR_CMTP_SIG	(39)
+#define RSPF_SIG		(73)
+#define VMTP_SIG		(81)
+#define OSPFIGP_SIG		(89)
+#define IPIP_SIG		(94)
+#define ENCAP_SIG		(98)
+
+
+// TCP 协议
+// TCP头部（20字节）
+typedef struct _tcp_header
+{
+    u_short	sport;				// 源端口号
+    u_short	dport;				// 目的端口号
+    u_int	seq_no;				// 序列号
+    u_int	ack_no;				// 确认号
+    u_char	thl:4;				// tcp头部长度
+    u_char	reserved_1:4;		// 保留6位中的4位首部长度
+    u_char	reseverd_2:2;		// 保留6位中的2位
+    u_char	flag:6;				// 6位标志
+    u_short	wnd_size;			// 16位窗口大小
+    u_short	chk_sum;			// 16位TCP检验和
+    u_short	urgt_p;				// 16为紧急指针
+}tcp_header;
+
+#define FTP_PORT 		(21)
+#define TELNET_PORT 	(23)
+#define SMTP_PORT 		(25)
+#define HTTP_PORT  		(80)
+#define HTTPS_PORT		(443)
+#define HTTP2_PORT 		(8080)
+#define POP3_PORT 		(110)
+
+
+// UDP 协议
 /* UDP header*/
 typedef struct udp_header
 {
@@ -50,6 +107,24 @@ typedef struct udp_header
     u_short len;			// Datagram length
     u_short crc;			// Checksum
 }udp_header;
+
+#define DNS_PORT		(53)
+#define SNMP_PORT		(161)
+
+#define QQ_SIGN			('\x02')	// OICQ协议标识
+#define QQ_SER_PORT		(8000)		// QQ服务器所用端口号
+#define QQ_NUM_OFFSET	(7)			// QQ号码信息在QQ协议头中的偏移
+
+QString Pkt::getTime(){
+    struct tm *ltime;
+    char timestr[10];
+    time_t local_tv_sec;
+    local_tv_sec = header->ts.tv_sec;
+    ltime=localtime(&local_tv_sec);
+    strftime( timestr, sizeof timestr, "%H:%M:%S", ltime);
+    // sprintf(timestr,"%s%.6d",timestr,header->ts.tv_usec);
+    return QString("%1.%2").arg(timestr).arg(header->ts.tv_usec);
+}
 
 void Pkt::unpackEthHeader(){
     ethernet_header* eth = (ethernet_header *)(pkt_data);
@@ -68,7 +143,7 @@ void Pkt::unpackEthHeader(){
         this->dstMac +=  dMac[i] + dMac[i+1];
     }*/
     this->srcMac = dMac;
-    this->dstMac = sMac; // TODO: 每隔两位插入一个：
+    this->dstMac = sMac; // TODO: 每隔两位插入一个： 通过结构体实现比较简单
 
     switch(eth->type){
     //0x 00 08 for 0x 08 00
@@ -77,6 +152,42 @@ void Pkt::unpackEthHeader(){
         case 0x0008:this->type = "IPv4"; break;
         case 0x0608:this->type = "ARP"; break;
         case 0xDD86:this->type = "IPv6"; break;
-    default: this->type = QString::number(eth->type,16);break; // "Unkown"
+        default: this->type = QString("Unkown:").append(QString::number(eth->type,16));break;
     }
+}
+
+void Pkt::unpackIpHeader(){
+    ipv4_header* ih = (ipv4_header *)(pkt_data+sizeof(ethernet_header));
+    ip_len = (ih->ver_ihl & 0xF) * 4;
+    srcIp = QString("%1.%2.%3.%4")
+            .arg(ih->saddr.byte1)
+            .arg(ih->saddr.byte2)
+            .arg(ih->saddr.byte3)
+            .arg(ih->saddr.byte4);
+    dstIp = QString("%1.%2.%3.%4")
+            .arg(ih->daddr.byte1)
+            .arg(ih->daddr.byte2)
+            .arg(ih->daddr.byte3)
+            .arg(ih->daddr.byte4);
+    switch(ih->proto){
+        case UDP_SIG: this->ip_proto = "udp"; break;
+        case TCP_SIG: this->ip_proto = "tcp"; break;
+        default: this->ip_proto = QString("Unkown:").append(QString::number(ih->proto));break;
+    }
+}
+
+void Pkt::unpackUdpHeader(){
+    udp_header* uh = (udp_header *)(pkt_data + sizeof(ethernet_header) + ip_len);
+    sport = ntohs(uh->sport);
+    dport = ntohs(uh->dport);
+}
+
+bool Pkt::parseQq(){
+    u_char *pByte = pkt_data + sizeof(ethernet_header) + ip_len + sizeof(udp_header);
+    if (*pByte == QQ_SIGN && (sport == QQ_SER_PORT || dport == QQ_SER_PORT) ) {
+        qqNumber = *(int *)(pByte + QQ_NUM_OFFSET);
+    }
+    qqNumber = ntohl(qqNumber);// 转换字节序
+    if (qqNumber == 0) return false;
+    return true;
 }

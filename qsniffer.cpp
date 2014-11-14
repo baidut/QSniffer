@@ -94,6 +94,11 @@ void QSniffer::setFilter(char* filter, int optimize){
         nic_list[i]-> setFilter( filter, optimize );
     }
 }
+void QSniffer::clearFilter(){
+    for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
+        nic_list[i]-> setFilter("");
+    }
+}
 void QSniffer::setActionOnCaptured(pcap_handler handler_function){
     for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
         nic_list[i]-> packet_handler = handler_function;

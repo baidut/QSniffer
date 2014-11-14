@@ -54,13 +54,14 @@ Pkt* Nic::getNextPacket(){
     u_char *pkt_data;
     int res = pcap_next_ex( adhandle, &header, (const u_char**)&pkt_data);
     if(res != 1) return NULL; // 不能无线等待下一个数据包
-    Pkt* pkt = new Pkt(header,pkt_data,this);
+    Pkt* pkt = new Pkt(header,pkt_data,this); // 内存分配可能比较费时间
     return pkt;
 }
 
 void Nic::startCapture(){
-    bool ret = this->setFilter(""); // 默认无filter tcp and udp
-    Q_ASSERT(ret == true);
+    // 这个方法已经废弃
+    //bool ret = this->setFilter(""); // 默认无filter tcp and udp
+    //Q_ASSERT(ret == true);
     // 设备未打开 this-> adhandle == NULL
     pcap_loop(this-> adhandle, 0 ,dflt_packet_handler, NULL); // (u_char*) this
     // user 参数标识是来自哪个网卡的等等信息

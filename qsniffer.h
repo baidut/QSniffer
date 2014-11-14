@@ -40,6 +40,7 @@ public:
     bool releaseDevice(int index);
     CaptureThread* getCaptureThread(int index);
     void setFilter(char *filter, int optimize = 1);
+    void clearFilter();
     void startCapture();
     void stopCapture();
     void startCapThread();  // 全部线程运行
