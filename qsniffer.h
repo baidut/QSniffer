@@ -39,7 +39,7 @@ public:
     bool grabDevice(int index); // 实例化设备类，接收线程
     bool releaseDevice(int index);
     CaptureThread* getCaptureThread(int index);
-    void setFilter(char *filter, int optimize);
+    void setFilter(char *filter, int optimize = 1);
     void startCapture();
     void stopCapture();
     void startCapThread();  // 全部线程运行

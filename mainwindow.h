@@ -39,6 +39,10 @@ private slots:
 
     void on_pushButton_captureOptions_clicked();
 
+    void on_pushButton_clearFilter_clicked();
+
+    void on_pushButton_applyFilter_clicked();
+
 private:
     Ui::MainWindow *ui;
     QSniffer *qs; // 采用实例（内部）还是指针（外部）的问题，通常采用外部指针，例如此处ui

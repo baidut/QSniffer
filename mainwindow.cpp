@@ -4,6 +4,7 @@
 #include "qsniffer.h" //隐藏内部结构，只做类的声明
 #include <QMessageBox>
 #include <QString>
+#include <QCompleter>
 
 #include "pkt.h"
 
@@ -31,6 +32,15 @@ MainWindow::MainWindow(QWidget *parent) :
     this->qs = new QSniffer;
     QStringList dev_list = this->qs->getDeviceList();
     ui->listWidget_dev->addItems(dev_list);
+
+
+    QStringList strings;
+    strings << "tcp" << "tcp and udp" << "udp";
+    QCompleter* completer = new QCompleter(strings, this); // 传递this父对象指针，MW析构时可以自动释放
+    ui->comboBox_filter->clear();
+    ui->comboBox_filter->addItems(strings);
+    ui->comboBox_filter->setEditable(true);
+    ui->comboBox_filter->setCompleter(completer);
 }
 
 MainWindow::~MainWindow()
@@ -64,16 +74,28 @@ void MainWindow::on_pushButton_start_clicked(bool checked)
 }
 
 void MainWindow::on_package_captured(Pkt* pkt){
-    ui->textBrowser_pkt->append(QString("packet captured:%1").arg(QString((const char*)(pkt->data()))));
-    //int row = ui->tableWidget_pkt->rowCount();
-    //ui->tableWidget_pkt->insertRow(row);
-    //ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem("Hello!"));
-    //ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem((const char*)pkt->time()));
-    //ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem((const char*)pkt->time()));
-    delete pkt;// 否则内存。。。。
+    int row = ui->tableWidget_pkt->rowCount();
+    ui->tableWidget_pkt->insertRow(row);
+    ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem(pkt->time()));
+    ui->tableWidget_pkt->setItem(row,4,new QTableWidgetItem(QString("%1/%2").arg(pkt->len()).arg(pkt->caplen())));
+    delete pkt;// 释放内存
 }
 
 void MainWindow::on_pushButton_captureOptions_clicked()
 {
     emit shutdown();
+}
+
+void MainWindow::on_pushButton_clearFilter_clicked()
+{
+    ui->comboBox_filter->clear();
+    qs->setFilter("");
+}
+
+void MainWindow::on_pushButton_applyFilter_clicked()
+{
+    QString qstr = ui->comboBox_filter->currentText();
+    QByteArray ba = qstr.toLatin1();
+    char* str = ba.data();
+    qs->setFilter(str);
 }

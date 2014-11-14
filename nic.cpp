@@ -24,7 +24,8 @@ Nic::Nic(pcap_if_t* dev,QObject *parent):QObject(parent){
     mode = PCAP_OPENFLAG_PROMISCUOUS;
     max_timeout = 1000;
 
-    //if(this->open())QMessageBox::about(NULL, "OK", "Open OK!");
+    bool ret = this->open();
+    Q_ASSERT(ret == true);
 }
 
 bool Nic::open(){
@@ -58,7 +59,8 @@ Pkt* Nic::getNextPacket(){
 }
 
 void Nic::startCapture(){
-    //if( this->setFilter("tcp") )QMessageBox::about(NULL, "OK", "Open OK!");
+    bool ret = this->setFilter("tcp and udp");
+    Q_ASSERT(ret == true);
     // 设备未打开 this-> adhandle == NULL
     pcap_loop(this-> adhandle, 0 ,dflt_packet_handler, NULL); // (u_char*) this
     // user 参数标识是来自哪个网卡的等等信息
@@ -79,12 +81,11 @@ bool Nic::sendPackage(u_char* content){
 bool Nic::setFilter(const char* filter, int optimize){  //"tcp"
     u_int netmask;
 
-    /* Check the link layer. We support only Ethernet for simplicity. */
+    /* Check the link layer. We support only Ethernet for simplicity.
     if(pcap_datalink(adhandle) != DLT_EN10MB){
         // fprintf(stderr,"\nThis program works only on Ethernet networks.\n");
         return false;
-    }
-
+    }*/
 
     if (this-> dev-> addresses != NULL)
         /* 获取接口第一个地址的掩码 */
