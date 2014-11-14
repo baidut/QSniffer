@@ -15,7 +15,6 @@ class QSniffer;
 namespace Ui {
 class MainWindow;
 }
-class Packet;
 
 class MainWindow : public QMainWindow
 {

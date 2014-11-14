@@ -20,73 +20,57 @@
 
 class Nic;
 
-/* 封装对一个数据包的解析方法
+#include <QString>
+
+/* 封装对一个数据包的解析方法 解析的数据如何传递-QString还是普通的char*
+ * QString可以自行释放，而且可变长
+ * 如果是char*还需要释放数据，在包析构的时候进行处理
  */
 class Pkt {
+    /* 类内部typedef
+        typedef enum{
+            IPv4 = 0x0800,
+            ARP = 0x0806,
+            IPv6 = 0x86DD,
+        }QEthType;
+        typedef struct{
+            QString    dst;
+            QString    src;
+            QEthType   type;
+        }QEthHeader;*/
 public:
     Pkt(struct pcap_pkthdr *header,u_char *pkt_data,Nic* nic){
         this-> header = header;
         this-> pkt_data = pkt_data;
         this-> nic = nic;
     }
-    char*   time();  // 精确到us
-    int     len();
-    u_char* data();
+    // header 解析
+    QString time(){
+        struct tm *ltime;
+        char timestr[10];
+        time_t local_tv_sec;
+        local_tv_sec = header->ts.tv_sec;
+        ltime=localtime(&local_tv_sec);
+        strftime( timestr, sizeof timestr, "%H:%M:%S", ltime);
+        // sprintf(timestr,"%s%.6d",timestr,header->ts.tv_usec);
+        return QString("%1.%2").arg(timestr).arg(header->ts.tv_usec);
+    }
+    int len(){
+        return header->len;
+    }
+    int caplen(){
+        return header->caplen;
+    }
+    // 数据解析
+    u_char* data(){
+        return pkt_data;
+    }
+    // QEthHeader unpackEthHeader();
 
 private:
     Nic*    nic; // 可以访问数据包来源的网卡设备
-    struct pcap_pkthdr *header;
+    struct pcap_pkthdr *header; // 头部有时间戳、捕捉长度和原始长度参数（当限制捕捉长度时两者不同）
     u_char *pkt_data;
 };
-
-
-/* 4 bytes IP address */
-typedef struct ip_address
-{
-    u_char  byte1;
-    u_char  byte2;
-    u_char  byte3;
-    u_char  byte4;
-}ip_address;
-
-typedef struct {
-    u_char  destination[6];
-    u_char  source[6];
-    u_short type;
-}ethernet_header;
-
-typedef struct {
-    u_short hardware_type;
-    u_short protocol_type;
-    u_char  hardware_size;
-    u_char  protocol_size;
-    u_char  opcode;
-    // padding is part of ethernet frame, not here.
-}arp_content;
-
-/* IPv4 header */
-typedef struct ip_header
-{
-    u_char	ver_ihl;		// Version (4 bits) + Internet header length (4 bits)
-    u_char	tos;			// Type of service
-    u_short tlen;			// Total length
-    u_short identification; // Identification
-    u_short flags_fo;		// Flags (3 bits) + Fragment offset (13 bits)
-    u_char	ttl;			// Time to live
-    u_char	proto;			// Protocol
-    u_short crc;			// Header checksum
-    ip_address	saddr;		// Source address
-    ip_address	daddr;		// Destination address
-    u_int	op_pad;			// Option + Padding
-}ip_header;
-
-/* UDP header*/
-typedef struct udp_header
-{
-    u_short sport;			// Source port
-    u_short dport;			// Destination port
-    u_short len;			// Datagram length
-    u_short crc;			// Checksum
-}udp_header;
 
 #endif // PKT_H

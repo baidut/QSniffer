@@ -17,7 +17,6 @@
  * dev.startCaptue();
  */
 
-
 class MainWindow;
 class CaptureThread;
 

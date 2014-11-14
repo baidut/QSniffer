@@ -5,6 +5,8 @@
 #include <QMessageBox>
 #include <QString>
 
+#include "pkt.h"
+
 
 // 主窗口只能打开一个实例的话，可以将qs放在外部，这样可以隐藏qs，但显然不合适
 /*
@@ -53,7 +55,6 @@ void MainWindow::on_pushButton_start_clicked(bool checked)
               connect(capThread,SIGNAL(captured(Pkt*)),this,SLOT(on_package_captured(Pkt*)));
            }
         }
-        QMessageBox::information(NULL, "Title",  "hahha" , QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
         qs->startCapThread();
     }
     else{
@@ -63,8 +64,12 @@ void MainWindow::on_pushButton_start_clicked(bool checked)
 }
 
 void MainWindow::on_package_captured(Pkt* pkt){
-    //sprintf
-    ui->textBrowser_pkt->append("packet captured!");
+    ui->textBrowser_pkt->append(QString("packet captured:%1").arg(QString((const char*)(pkt->data()))));
+    //int row = ui->tableWidget_pkt->rowCount();
+    //ui->tableWidget_pkt->insertRow(row);
+    //ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem("Hello!"));
+    //ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem((const char*)pkt->time()));
+    //ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem((const char*)pkt->time()));
     delete pkt;// 否则内存。。。。
 }
 

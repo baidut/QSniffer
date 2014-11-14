@@ -6,15 +6,6 @@
 
 class Nic;
 class Pkt; // 采集线程不知道数据包的结构和操作，相关处理由Nic进行，它只是将包传送到主窗口
-class Packet;
-
-class Packet{
-public:
-    Packet(int data){
-        this->data = data;
-    }
-    int data;
-};
 
 class CaptureThread : public QThread {
     Q_OBJECT
