@@ -78,6 +78,12 @@ void MainWindow::on_package_captured(Pkt* pkt){
     ui->tableWidget_pkt->insertRow(row);
     ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem(pkt->time()));
     ui->tableWidget_pkt->setItem(row,4,new QTableWidgetItem(QString("%1/%2").arg(pkt->len()).arg(pkt->caplen())));
+
+    pkt->unpackEthHeader();
+    ui->tableWidget_pkt->setItem(row,1,new QTableWidgetItem(pkt->getSrcMac()));
+    ui->tableWidget_pkt->setItem(row,2,new QTableWidgetItem(pkt->getDstMac()));
+    ui->tableWidget_pkt->setItem(row,3,new QTableWidgetItem(pkt->getType()));
+
     delete pkt;// 释放内存
 }
 

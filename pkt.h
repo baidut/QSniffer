@@ -27,17 +27,7 @@ class Nic;
  * 如果是char*还需要释放数据，在包析构的时候进行处理
  */
 class Pkt {
-    /* 类内部typedef
-        typedef enum{
-            IPv4 = 0x0800,
-            ARP = 0x0806,
-            IPv6 = 0x86DD,
-        }QEthType;
-        typedef struct{
-            QString    dst;
-            QString    src;
-            QEthType   type;
-        }QEthHeader;*/
+
 public:
     Pkt(struct pcap_pkthdr *header,u_char *pkt_data,Nic* nic){
         this-> header = header;
@@ -65,9 +55,31 @@ public:
     u_char* data(){
         return pkt_data;
     }
-    // QEthHeader unpackEthHeader();
+    void unpackEthHeader();
 
-private:
+    QString getSrcMac(){
+        return srcMac;
+    }
+    QString getDstMac(){
+        return dstMac;
+    }
+    QString getType(){
+        return type;
+    }
+
+private: // 数据保护
+
+    QString srcMac;
+    QString dstMac;
+    /* 类内部typedef
+        typedef enum{
+            IPv4 = 0x0800,
+            ARP = 0x0806,
+            IPv6 = 0x86DD,
+        }QEthType;*/
+    //QEthType type; // 虽然枚举处理较字符串更方便高效，但这里注重信息直观性，否则就失去了解析的意义
+    QString type;
+
     Nic*    nic; // 可以访问数据包来源的网卡设备
     struct pcap_pkthdr *header; // 头部有时间戳、捕捉长度和原始长度参数（当限制捕捉长度时两者不同）
     u_char *pkt_data;

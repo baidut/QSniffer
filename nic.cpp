@@ -59,7 +59,7 @@ Pkt* Nic::getNextPacket(){
 }
 
 void Nic::startCapture(){
-    bool ret = this->setFilter("tcp and udp");
+    bool ret = this->setFilter(""); // 默认无filter tcp and udp
     Q_ASSERT(ret == true);
     // 设备未打开 this-> adhandle == NULL
     pcap_loop(this-> adhandle, 0 ,dflt_packet_handler, NULL); // (u_char*) this
