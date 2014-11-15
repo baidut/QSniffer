@@ -16,18 +16,15 @@ typedef struct {
     u_short protocol_type;
     u_char  hardware_size;
     u_char  protocol_size;
-    u_char  opcode;
+    u_short opcode;
+    mac_address senderMac;
+    ip_address  senderIp;
+    mac_address targetMac;
+    ip_address  targetIp;
     // padding is part of ethernet frame, not here.
 }arp_content;
-/* 4 bytes IP address */
-typedef struct ip_address
-{
-    u_char  byte1;
-    u_char  byte2;
-    u_char  byte3;
-    u_char  byte4;
-}ip_address;
 
+// IP协议
 /* IPv4 header */
 typedef struct ipv4_header
 {
@@ -74,8 +71,7 @@ typedef struct ipv4_header
 
 // TCP 协议
 // TCP头部（20字节）
-typedef struct _tcp_header
-{
+typedef struct _tcp_header {
     u_short	sport;				// 源端口号
     u_short	dport;				// 目的端口号
     u_int	seq_no;				// 序列号
@@ -100,8 +96,7 @@ typedef struct _tcp_header
 
 // UDP 协议
 /* UDP header*/
-typedef struct udp_header
-{
+typedef struct udp_header {
     u_short sport;			// Source port
     u_short dport;			// Destination port
     u_short len;			// Datagram length
@@ -124,6 +119,25 @@ QString Pkt::getTime(){
     strftime( timestr, sizeof timestr, "%H:%M:%S", ltime);
     // sprintf(timestr,"%s%.6d",timestr,header->ts.tv_usec);
     return QString("%1.%2").arg(timestr).arg(header->ts.tv_usec);
+}
+
+QString Pkt::ip2QSting(ip_address addr){
+    return QString("%1.%2.%3.%4")
+            .arg(addr.byte1)
+            .arg(addr.byte2)
+            .arg(addr.byte3)
+            .arg(addr.byte4);
+}
+
+QString Pkt::mac2QSting(mac_address addr){
+    // 注意是16进制,占2位
+    return QString("%1:%2:%3:%4:%5:%6")
+            .arg(addr.byte1,2,16)
+            .arg(addr.byte2,2,16)
+            .arg(addr.byte3,2,16)
+            .arg(addr.byte4,2,16)
+            .arg(addr.byte5,2,16)
+            .arg(addr.byte6,2,16);
 }
 
 void Pkt::unpackEthHeader(){
@@ -152,23 +166,17 @@ void Pkt::unpackEthHeader(){
         case 0x0008:this->type = "IPv4"; break;
         case 0x0608:this->type = "ARP"; break;
         case 0xDD86:this->type = "IPv6"; break;
-        default: this->type = QString("Unkown:").append(QString::number(eth->type,16));break;
+        default: this->type = QString("Unkown:")
+                                .append(QString::number(eth->type,16));
+                 break;
     }
 }
 
 void Pkt::unpackIpHeader(){
     ipv4_header* ih = (ipv4_header *)(pkt_data+sizeof(ethernet_header));
     ip_len = (ih->ver_ihl & 0xF) * 4;
-    srcIp = QString("%1.%2.%3.%4")
-            .arg(ih->saddr.byte1)
-            .arg(ih->saddr.byte2)
-            .arg(ih->saddr.byte3)
-            .arg(ih->saddr.byte4);
-    dstIp = QString("%1.%2.%3.%4")
-            .arg(ih->daddr.byte1)
-            .arg(ih->daddr.byte2)
-            .arg(ih->daddr.byte3)
-            .arg(ih->daddr.byte4);
+    srcIp = ip2QSting(ih->saddr);
+    dstIp = ip2QSting(ih->daddr);
     switch(ih->proto){
         case UDP_SIG: this->ip_proto = "udp"; break;
         case TCP_SIG: this->ip_proto = "tcp"; break;
@@ -180,6 +188,41 @@ void Pkt::unpackUdpHeader(){
     udp_header* uh = (udp_header *)(pkt_data + sizeof(ethernet_header) + ip_len);
     sport = ntohs(uh->sport);
     dport = ntohs(uh->dport);
+}
+
+QString Pkt::parseArp(){
+    arp_content* content = (arp_content *)(pkt_data+sizeof(ethernet_header));
+    QString ArpType;
+
+    switch(content->opcode){
+    // 大端小端问题
+        case 0x0100:
+            ArpType = "ARP Request";
+            if( content->targetIp == content->senderIp )
+               info = QString("%1:who has %2? tell %3")
+                        .arg(ArpType)
+                        .arg(ip2QSting(content->targetIp))
+                        .arg(ip2QSting(content->senderIp));
+            else{
+               info = QString("%1:Gratuitous ARP for %2")
+                        .arg(ArpType)
+                        .arg(content->senderIp.toQString());
+            }
+            break;
+        case 0x0200:
+            ArpType = "ARP Reply";
+            info = QString("%1:%2 is at %3")
+                    .arg(ArpType)
+                    .arg(ip2QSting(content->senderIp))
+                    .arg(mac2QSting(content->senderMac));
+            break;
+        case 0x0300: ArpType = "RARP Request"; break;
+        case 0x0400: ArpType = "RARP Reply"; break;
+        default: info = QString("Unkown:")
+                        .append(QString::number(content->opcode));
+                 break;
+    }
+    return info;
 }
 
 bool Pkt::parseQq(){

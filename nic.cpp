@@ -31,8 +31,8 @@ char* Nic::getName(){
     return this->dev->name;
 }
 
-QString Nic::getDescription(){
-    return (const char*)this->dev->description;
+char* Nic::getDescription(){
+    return this->dev->description;
 }
 
 bool Nic::open(){

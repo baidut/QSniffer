@@ -99,7 +99,7 @@ void MainWindow::on_package_captured(Pkt* pkt){
             }*/
         }
         else if(pkt->getProto() == "arp"){
-
+            info = pkt->parseArp();
         }
     }
     else {
@@ -115,6 +115,7 @@ void MainWindow::on_package_captured(Pkt* pkt){
     ui->tableWidget_pkt->setItem(row,2,new QTableWidgetItem(destination));
     ui->tableWidget_pkt->setItem(row,3,new QTableWidgetItem(type));
     ui->tableWidget_pkt->setItem(row,4,new QTableWidgetItem(length));
+    ui->tableWidget_pkt->setItem(row,5,new QTableWidgetItem(info));
 }
 
 void MainWindow::on_pushButton_captureOptions_clicked()

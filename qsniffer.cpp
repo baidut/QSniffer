@@ -57,7 +57,7 @@ bool QSniffer::grabDevice(int index){
     if( this->nic_list[index] ) return false;
     pcap_if_t *d=alldevs;
     int i = 0;
-    for(;i< index-1;d=d->next, i++);
+    for(;i< index;d=d->next, i++); // 差1bug
     Nic* nic = new Nic(d);
     // 设备创建失败
     Q_ASSERT(nic != NULL);
