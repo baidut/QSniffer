@@ -19,7 +19,6 @@ Nic::~Nic(){
 Nic::Nic(pcap_if_t* dev,QObject *parent):QObject(parent){
     this-> dev = dev;
 
-    this->name = dev->name;
     max_length = 65536;
     mode = PCAP_OPENFLAG_PROMISCUOUS;
     max_timeout = 1000;
@@ -28,9 +27,17 @@ Nic::Nic(pcap_if_t* dev,QObject *parent):QObject(parent){
     Q_ASSERT(ret == true);
 }
 
+char* Nic::getName(){
+    return this->dev->name;
+}
+
+QString Nic::getDescription(){
+    return (const char*)this->dev->description;
+}
+
 bool Nic::open(){
     this-> adhandle = pcap_open_live(
-                                this-> name,            // 设备名
+                                this-> getName(),        // 设备名
                                 this-> max_length,      // 数据包大小限制
                                 this-> mode,            // 网卡设置打开模式
                                 this-> max_timeout,		// 读取超时时间
@@ -38,6 +45,7 @@ bool Nic::open(){
 
     if (this-> adhandle == NULL)
         return false;
+    qDebug("Nic %s opened successfully.",this->getName()); // TODO 显示设备打开状态，混杂模式
     return true;
 }
 

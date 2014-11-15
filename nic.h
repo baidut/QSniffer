@@ -43,6 +43,9 @@ public:
     Pkt*    getNextPacket(); // 获取数据包
 
     int     getStatus();
+    char*   getName();
+    char*   getDescription();
+    QString getMacAddress();
 
     bool    sendPackage(u_char *content);
     bool    setFilter(const char *filter, int optimize = 1);
@@ -59,10 +62,6 @@ signals:
     void    captured(Pkt* packet);
 
 private:
-    char*   name;
-    char*   description;
-    char*   mac_address;
-
     char    errbuf[PCAP_ERRBUF_SIZE+1];
     //QStringList addresses;
 
