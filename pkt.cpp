@@ -5,8 +5,8 @@
 
 // Mac头部（14字节）
 typedef struct {
-    u_char  destination[6];
-    u_char  source[6];
+    mac_address  dstMac;
+    mac_address  srcMac;
     u_short type; //u_short（2字节）
 }ethernet_header;
 
@@ -142,22 +142,8 @@ QString Pkt::mac2QSting(mac_address addr){
 
 void Pkt::unpackEthHeader(){
     ethernet_header* eth = (ethernet_header *)(pkt_data);
-    QByteArray dMac, sMac;
-
-    dMac.setRawData((const char *)eth->destination, 6);
-    sMac.setRawData((const char *)eth->source, 6);
-    dMac = dMac.toHex().toUpper();
-    sMac = sMac.toHex().toUpper();
-
-    /*乱码this->srcMac = sMac[0] + sMac[1];
-    this->dstMac = dMac[0] + dMac[1];
-
-    for(int i=3;i<12;i+=2){
-        this->srcMac +=  sMac[i] + sMac[i+1];
-        this->dstMac +=  dMac[i] + dMac[i+1];
-    }*/
-    this->srcMac = dMac;
-    this->dstMac = sMac; // TODO: 每隔两位插入一个： 通过结构体实现比较简单
+    this->srcMac = eth->dstMac;
+    this->dstMac = eth->dstMac;
 
     switch(eth->type){
     //0x 00 08 for 0x 08 00
@@ -166,8 +152,8 @@ void Pkt::unpackEthHeader(){
         case 0x0008:this->type = "IPv4"; break;
         case 0x0608:this->type = "ARP"; break;
         case 0xDD86:this->type = "IPv6"; break;
-        default: this->type = QString("Unkown:")
-                                .append(QString::number(eth->type,16));
+        default: this->type = QString("Unkown:0x%1")
+                                .arg(eth->type,4,16,QChar('0')); // TODO注意这里需要倒序，大小端对齐问题
                  break;
     }
 }
@@ -175,12 +161,13 @@ void Pkt::unpackEthHeader(){
 void Pkt::unpackIpHeader(){
     ipv4_header* ih = (ipv4_header *)(pkt_data+sizeof(ethernet_header));
     ip_len = (ih->ver_ihl & 0xF) * 4;
-    srcIp = ip2QSting(ih->saddr);
-    dstIp = ip2QSting(ih->daddr);
+    srcIp = ih->saddr;
+    dstIp = ih->daddr;
     switch(ih->proto){
         case UDP_SIG: this->ip_proto = "udp"; break;
         case TCP_SIG: this->ip_proto = "tcp"; break;
-        default: this->ip_proto = QString("Unkown:").append(QString::number(ih->proto));break;
+        default: this->ip_proto = QString("Unkown:0x%1")
+                .arg(ih->proto,4,16,QChar('0'));break;
     }
 }
 
@@ -218,9 +205,8 @@ QString Pkt::parseArp(){
             break;
         case 0x0300: ArpType = "RARP Request"; break;
         case 0x0400: ArpType = "RARP Reply"; break;
-        default: info = QString("Unkown:")
-                        .append(QString::number(content->opcode));
-                 break;
+        default: info =  QString("Unkown:0x%1")
+                .arg(content->opcode,4,16,QChar('0'));break;
     }
     return info;
 }

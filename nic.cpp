@@ -25,6 +25,7 @@ Nic::Nic(pcap_if_t* dev,QObject *parent):QObject(parent){
 
     bool ret = this->open();
     Q_ASSERT(ret == true);
+    setFilter("tcp and udp");// 包太多，主窗口会失去响应。。。
 }
 
 char* Nic::getName(){
@@ -66,19 +67,6 @@ Pkt* Nic::getNextPacket(){
     return pkt;
 }
 
-void Nic::startCapture(){
-    // 这个方法已经废弃
-    //bool ret = this->setFilter(""); // 默认无filter tcp and udp
-    //Q_ASSERT(ret == true);
-    // 设备未打开 this-> adhandle == NULL
-    pcap_loop(this-> adhandle, 0 ,dflt_packet_handler, NULL); // (u_char*) this
-    // user 参数标识是来自哪个网卡的等等信息
-}
-
-void Nic::stopCapture(){
-    pcap_breakloop(this-> adhandle);
-}
-
 bool Nic::sendPackage(u_char* content){
     int len = strlen((char*)content);
     // gen_packet(content,len); 注意填充源mac和目的mac 还有协议
@@ -113,18 +101,4 @@ bool Nic::setFilter(const char* filter, int optimize){  //"tcp"
     return true;
 }
 
-// 一个对于所有Nic类都相同的处理函数，为了向外部封装包接收回调函数结构
-// 相当于一个分发包工具，先注册设备号，之后按照设备号领取对应的包处理函数(不同设备的包处理函数可以不同)
-void dflt_packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data){
-    // Nic* nic = (Nic*) param;                    // 提取出对应的设备指针
-    // Pkt* pkt = new Pkt((struct pcap_pkthdr *)header,(u_char *)pkt_data,nic);    // 新建数据包的一个实例
-    //*(nic->on_captured) (pkt);                  // 调用对应的包处理函数
-    // emit nic->captured(pkt);
-    // 有数据重组和交付设备的代价，但便于处理
-}
-
-// connect(nic,SINGAL(captured(pkt)),&w,on_package_captured(pkt));
-// 必须让主界面类自己做 connect(nic,SINGAL(captured(pkt)),this,on_package_captured(pkt));
-// 可以根据不同nic的信号进行不同槽的处理
-// foreach (active_nic) connect...
 

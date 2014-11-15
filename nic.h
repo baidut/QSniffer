@@ -53,11 +53,7 @@ public:
     int     mode;
     int     max_length;
     int     max_timeout;
-    pkt_handler  on_captured; // pcap_handler: new Packet, call on_captured function;
-    pcap_handler packet_handler; // 包接收触发函数 默认为分发器
 
-
-    friend void dflt_packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data);
 signals:
     void    captured(Pkt* packet);
 

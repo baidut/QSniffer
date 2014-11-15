@@ -33,12 +33,12 @@ typedef struct mac_address{
 
     QString toQString(){
         return QString("%1:%2:%3:%4:%5:%6")
-                .arg(byte1,2,16)// 注意是16进制,占2位
-                .arg(byte2,2,16)
-                .arg(byte3,2,16)
-                .arg(byte4,2,16)
-                .arg(byte5,2,16)
-                .arg(byte6,2,16);
+                .arg(byte1,2,16,QChar('0'))// 注意是16进制,占2位,空位补0
+                .arg(byte2,2,16,QChar('0'))
+                .arg(byte3,2,16,QChar('0'))
+                .arg(byte4,2,16,QChar('0'))
+                .arg(byte5,2,16,QChar('0'))
+                .arg(byte6,2,16,QChar('0'));
     } // 变换函数更方便
     bool operator == (const struct mac_address& other) const{
            return       (byte1 == other.byte1)
@@ -85,11 +85,11 @@ public:
     QString getTime();
     int     getLen()    { return header->len;}
     int     getCaplen() { return header->caplen;}
-    QString getSrcMac() { return srcMac;}
-    QString getDstMac() { return dstMac;}
     QString getType()   { return type;}
-    QString getSrcIp()  { return srcIp;}
-    QString getDstIp()  { return dstIp;}
+    mac_address getSrcMac() { return srcMac;}
+    mac_address getDstMac() { return dstMac;}
+    ip_address  getSrcIp()  { return srcIp;}
+    ip_address  getDstIp()  { return dstIp;}
     u_short getSrcPort(){ return sport;}
     u_short getDstPort(){ return dport;}
     QString getProto()  { return ip_proto;}
@@ -110,12 +110,11 @@ public:
 
 private:
 
-
-    QString srcMac;
-    QString dstMac;
     QString type;
-    QString srcIp;
-    QString dstIp;
+    mac_address srcMac;
+    mac_address dstMac;
+    ip_address  srcIp;
+    ip_address  dstIp;
     QString ip_proto;
     u_int   ip_len;
     u_short sport,dport;

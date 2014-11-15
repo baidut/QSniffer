@@ -81,14 +81,16 @@ void MainWindow::on_package_captured(Pkt* pkt){
 
     pkt->unpackEthHeader();
 
-    if(pkt->getType()=="IPv4"){
+    type = pkt->getType();
+    if(type=="IPv4"){
         pkt->unpackIpHeader();
-        source = pkt->getSrcIp();
-        destination = pkt->getDstIp();
-        if(pkt->getProto() == "udp"){
+        source = pkt->getSrcIp().toQString();
+        destination = pkt->getDstIp().toQString();
+        type = pkt->getProto();
+        if(type == "udp"){
             pkt->unpackUdpHeader();
-            source.append(":").append(pkt->getSrcPort());
-            destination.append(":").append(pkt->getDstPort());
+            source.append(QString(":%1").arg(pkt->getSrcPort()));
+            destination.append(QString(":%1").arg(pkt->getDstPort()));
 
             /*if(pkt->parseQq()){
                 int row = ui->tableWidget_pkt->rowCount();
@@ -98,13 +100,13 @@ void MainWindow::on_package_captured(Pkt* pkt){
                 ui->tableWidget_qq->setItem(row,3,new QTableWidgetItem(pkt->getQqNum()));
             }*/
         }
-        else if(pkt->getProto() == "arp"){
+        else if(type == "arp"){
             info = pkt->parseArp();
         }
     }
     else {
-        source = pkt->getSrcMac();
-        destination = pkt->getDstMac();
+        source = pkt->getSrcMac().toQString();
+        destination = pkt->getDstMac().toQString();
     }
     delete pkt;// 释放内存
 

@@ -79,16 +79,6 @@ bool QSniffer::releaseDevice(int index){
 }
 
 // 多网卡操作
-void QSniffer::startCapture(){
-    for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
-        nic_list[i]-> startCapture();
-    }
-}
-void QSniffer::stopCapture(){
-    for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
-        nic_list[i]-> stopCapture();
-    }
-}
 void QSniffer::setFilter(char* filter, int optimize){
     for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
         nic_list[i]-> setFilter( filter, optimize );
@@ -97,16 +87,6 @@ void QSniffer::setFilter(char* filter, int optimize){
 void QSniffer::clearFilter(){
     for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
         nic_list[i]-> setFilter("");
-    }
-}
-void QSniffer::setActionOnCaptured(pcap_handler handler_function){
-    for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
-        nic_list[i]-> packet_handler = handler_function;
-    }
-}
-void QSniffer::setActionOnCaptured(pkt_handler handler_function){
-    for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
-        nic_list[i]-> on_captured = handler_function;
     }
 }
 
