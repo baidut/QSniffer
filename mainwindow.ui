@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget_main">
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -127,6 +127,13 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pushButton_captureOptions">
+             <property name="text">
+              <string>Capture Options</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1">
             <widget class="QPushButton" name="pushButton_start">
              <property name="text">
@@ -137,13 +144,6 @@
              </property>
              <property name="checked">
               <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QPushButton" name="pushButton_captureOptions">
-             <property name="text">
-              <string>Capture Options</string>
              </property>
             </widget>
            </item>
@@ -254,12 +254,21 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QTreeView" name="treeView"/>
+         <widget class="QTreeView" name="treeView">
+          <attribute name="headerCascadingSectionResizes">
+           <bool>false</bool>
+          </attribute>
+         </widget>
         </item>
         <item row="3" column="0">
          <widget class="QTextBrowser" name="textBrowser_pkt"/>
         </item>
        </layout>
+      </widget>
+      <widget class="QWidget" name="tab_6">
+       <attribute name="title">
+        <string>ARP</string>
+       </attribute>
       </widget>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
@@ -302,7 +311,7 @@
           <x>40</x>
           <y>50</y>
           <width>681</width>
-          <height>191</height>
+          <height>71</height>
          </rect>
         </property>
        </widget>

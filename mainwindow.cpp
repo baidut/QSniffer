@@ -74,32 +74,47 @@ void MainWindow::on_pushButton_start_clicked(bool checked)
 }
 
 void MainWindow::on_package_captured(Pkt* pkt){
-    int row = ui->tableWidget_pkt->rowCount();
-    ui->tableWidget_pkt->insertRow(row);
-    ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem(pkt->getTime()));
-    ui->tableWidget_pkt->setItem(row,4,new QTableWidgetItem(QString("%1/%2").arg(pkt->getLen()).arg(pkt->getCaplen())));
+    QString time,length,source,destination,type,info;
+
+    time = pkt->getTime();
+    length = QString("%1/%2").arg(pkt->getLen()).arg(pkt->getCaplen());
 
     pkt->unpackEthHeader();
-    ui->tableWidget_pkt->setItem(row,1,new QTableWidgetItem(pkt->getSrcMac()));
-    ui->tableWidget_pkt->setItem(row,2,new QTableWidgetItem(pkt->getDstMac()));
-    ui->tableWidget_pkt->setItem(row,3,new QTableWidgetItem(pkt->getType()));
 
     if(pkt->getType()=="IPv4"){
         pkt->unpackIpHeader();
-        ui->tableWidget_pkt->setItem(row,1,new QTableWidgetItem(pkt->getSrcIp()));
-        ui->tableWidget_pkt->setItem(row,2,new QTableWidgetItem(pkt->getDstIp()));
+        source = pkt->getSrcIp();
+        destination = pkt->getDstIp();
         if(pkt->getProto() == "udp"){
             pkt->unpackUdpHeader();
-            if(pkt->parseQq()){
+            source.append(":").append(pkt->getSrcPort());
+            destination.append(":").append(pkt->getDstPort());
+
+            /*if(pkt->parseQq()){
                 int row = ui->tableWidget_pkt->rowCount();
                 ui->tableWidget_qq->insertRow(row);
                 ui->tableWidget_qq->setItem(row,1,new QTableWidgetItem(pkt->getSrcIp()));
                 ui->tableWidget_qq->setItem(row,2,new QTableWidgetItem(pkt->getDstIp()));
                 ui->tableWidget_qq->setItem(row,3,new QTableWidgetItem(pkt->getQqNum()));
-            }
+            }*/
+        }
+        else if(pkt->getProto() == "arp"){
+
         }
     }
+    else {
+        source = pkt->getSrcMac();
+        destination = pkt->getDstMac();
+    }
     delete pkt;// 释放内存
+
+    int row = ui->tableWidget_pkt->rowCount();
+    ui->tableWidget_pkt->insertRow(row);
+    ui->tableWidget_pkt->setItem(row,0,new QTableWidgetItem(time));
+    ui->tableWidget_pkt->setItem(row,1,new QTableWidgetItem(source));
+    ui->tableWidget_pkt->setItem(row,2,new QTableWidgetItem(destination));
+    ui->tableWidget_pkt->setItem(row,3,new QTableWidgetItem(type));
+    ui->tableWidget_pkt->setItem(row,4,new QTableWidgetItem(length));
 }
 
 void MainWindow::on_pushButton_captureOptions_clicked()
