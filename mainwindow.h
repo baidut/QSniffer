@@ -33,14 +33,15 @@ signals:
 
 public slots:
     void on_package_captured(Pkt* pkt);
+    void dumpQqInfo(Pkt* pkt);
 
 private slots:
-    void on_pushButton_start_clicked(bool checked);
-
+    void on_pushButton_open_clicked();
+    void on_pushButton_close_clicked();
+    void on_pushButton_startCapture_clicked();
+    void on_pushButton_sniffQq_clicked();
     void on_pushButton_captureOptions_clicked();
-
     void on_pushButton_clearFilter_clicked();
-
     void on_pushButton_applyFilter_clicked();
 
 private:

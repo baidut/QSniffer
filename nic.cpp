@@ -25,7 +25,7 @@ Nic::Nic(pcap_if_t* dev,QObject *parent):QObject(parent){
 
     bool ret = this->open();
     Q_ASSERT(ret == true);
-    setFilter("arp");// tcp and udp包太多，主窗口会失去响应。。。
+    setFilter("arp and udp");// tcp and udp包太多，主窗口会失去响应。。。
 }
 
 char* Nic::getName(){

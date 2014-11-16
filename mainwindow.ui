@@ -18,13 +18,91 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget_main">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>Index</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="1" colspan="3">
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>InterfaceList</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="2" column="0" colspan="3">
+            <widget class="QListWidget" name="listWidget_dev">
+             <property name="selectionMode">
+              <enum>QAbstractItemView::MultiSelection</enum>
+             </property>
+             <property name="isWrapping" stdset="0">
+              <bool>false</bool>
+             </property>
+             <property name="uniformItemSizes">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QPushButton" name="pushButton_open">
+             <property name="whatsThis">
+              <string>打开选择的网络设备</string>
+             </property>
+             <property name="text">
+              <string>Open</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QPushButton" name="pushButton_close">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="whatsThis">
+              <string>关闭选择的网络设备</string>
+             </property>
+             <property name="text">
+              <string>Close</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QPushButton" name="pushButton_interfaceList">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Interface List</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Capture Help</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="1" column="0">
+            <widget class="QPushButton" name="pushButton_4">
+             <property name="text">
+              <string>Network Media</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pushButton_5">
+             <property name="text">
+              <string>How to Capture</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
         <item row="1" column="3">
          <widget class="QGroupBox" name="groupBox_4">
           <property name="title">
@@ -78,72 +156,46 @@
           </layout>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QGroupBox" name="groupBox_2">
+        <item row="1" column="4">
+         <widget class="QGroupBox" name="groupBox_6">
           <property name="title">
-           <string>Capture Help</string>
+           <string>About</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_2">
-           <item row="1" column="0">
-            <widget class="QPushButton" name="pushButton_4">
-             <property name="text">
-              <string>Network Media</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QPushButton" name="pushButton_5">
-             <property name="text">
-              <string>How to Capture</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </widget>
         </item>
-        <item row="0" column="1" colspan="3">
-         <widget class="QGroupBox" name="groupBox">
-          <property name="title">
-           <string>Capture</string>
+        <item row="0" column="4">
+         <widget class="QGroupBox" name="groupBox_application">
+          <property name="enabled">
+           <bool>false</bool>
           </property>
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="2" column="0" colspan="3">
-            <widget class="QListWidget" name="listWidget_dev">
-             <property name="selectionMode">
-              <enum>QAbstractItemView::MultiSelection</enum>
-             </property>
-             <property name="isWrapping" stdset="0">
-              <bool>false</bool>
-             </property>
-             <property name="uniformItemSizes">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
+          <property name="title">
+           <string>Application</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_10">
            <item row="0" column="0">
-            <widget class="QPushButton" name="pushButton_interfaceList">
+            <widget class="QPushButton" name="pushButton_startCapture">
              <property name="text">
-              <string>Interface List</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QPushButton" name="pushButton_captureOptions">
-             <property name="text">
-              <string>Capture Options</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QPushButton" name="pushButton_start">
-             <property name="text">
-              <string>Start</string>
+              <string>Start Capture</string>
              </property>
              <property name="checkable">
               <bool>true</bool>
              </property>
              <property name="checked">
               <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QPushButton" name="pushButton_sniffQq">
+             <property name="text">
+              <string>Find QQ numbers</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="pushButton_captureOptions">
+             <property name="text">
+              <string>Capture Options</string>
              </property>
             </widget>
            </item>
@@ -157,6 +209,40 @@
         <string>Capture</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7">
+        <item row="1" column="0">
+         <widget class="QTableWidget" name="tableWidget_pkt">
+          <column>
+           <property name="text">
+            <string>Time</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Source</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Destination</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Protocol</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Length</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Info</string>
+           </property>
+          </column>
+         </widget>
+        </item>
         <item row="0" column="0">
          <widget class="QGroupBox" name="groupBox_5">
           <property name="title">
@@ -219,50 +305,6 @@
           </layout>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QTableWidget" name="tableWidget_pkt">
-          <column>
-           <property name="text">
-            <string>Time</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Source</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Destination</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Protocol</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Length</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Info</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QTreeView" name="treeView">
-          <attribute name="headerCascadingSectionResizes">
-           <bool>false</bool>
-          </attribute>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QTextBrowser" name="textBrowser_pkt"/>
-        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_6">
@@ -294,17 +336,27 @@
          <widget class="QTableWidget" name="tableWidget_qq">
           <column>
            <property name="text">
+            <string>QQNumber</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Command</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Version</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>Source</string>
            </property>
           </column>
           <column>
            <property name="text">
             <string>Destination</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>QQNumber</string>
            </property>
           </column>
          </widget>

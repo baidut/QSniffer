@@ -48,6 +48,8 @@ public:
     void setActionOnCaptured(pkt_handler handler_function); // 封装后的包处理函数
     void setActionOnCaptured(pcap_handler handler_function); // 也可以不通过分发，直接设置
 
+    int getNextIndex(int index);
+
 private:
     QVector<Nic*>   nic_list;   // 为了便于维护，对应各个设备的指针，为空时设备未激活
     QVector<CaptureThread*> capThread_list; // 和nic相同的方式维护 职能：取设备下一个数据包，并发送出去

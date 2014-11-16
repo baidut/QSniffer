@@ -109,21 +109,17 @@ public:
     int     getIpLen();
     u_short getDstPort();
     u_char  getIpProto();
-    u_int   getQqNum()  { return qqNumber;}
 
-    bool    parseQq();
+    bool    isAboutQq();
+    u_int   getOicqNum();
+    u_short getOicqVersion();
+    u_short getOicqCommand();
     QString parseArp();
 
     // QQ数据包采用继承的方式，如果检测到包为QQ数据包，则根据父类构建子类。
     // u_char* data() { return pkt_data;} 暴露数据指针不安全
 
-    QString ip2QSting(ip_address);
-    QString mac2QSting(mac_address);
-
 private:
-    u_int   qqNumber;
-    QString info;
-
     Nic*    nic; // 可以访问数据包来源的网卡设备
     struct  pcap_pkthdr *header; // 头部有时间戳、捕捉长度和原始长度参数（当限制捕捉长度时两者不同）
     u_char* pkt_data;

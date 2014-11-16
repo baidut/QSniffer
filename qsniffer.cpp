@@ -90,3 +90,12 @@ void QSniffer::clearFilter(){
     }
 }
 
+// 这是个比较烂的方法，根据当前索引返回下一个，如果没有则返回0，暂时先这么实现，之后再修改
+int QSniffer::getNextIndex(int index){
+    if(index<0)return 0;
+    for(int i = index+1; i< nic_list.size(); i++)if(nic_list[i]){
+        return i;
+    }
+    return 0;
+}
+

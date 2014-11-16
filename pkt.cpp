@@ -28,7 +28,7 @@ typedef struct {
 /* IPv4 header */
 typedef struct ipv4_header
 {
-    u_char	ver_ihl;		// Version (4 bits) + Internet header length (4 bits)
+    u_char	ver_ihl;		// Version (4 bits) + Internet header length (4 bits) // TODO 可改为位域实现
     u_char	tos;			// Type of service
     u_short tlen;			// Total length
     u_short identification; // Identification
@@ -78,10 +78,6 @@ typedef struct udp_header {
 #define DNS_PORT		(53)
 #define SNMP_PORT		(161)
 
-#define QQ_SIGN			('\x02')	// OICQ协议标识
-#define QQ_SER_PORT		(8000)		// QQ服务器所用端口号
-#define QQ_NUM_OFFSET	(7)			// QQ号码信息在QQ协议头中的偏移
-
 QString Pkt::getTime(){
     struct tm *ltime;
     char timestr[10];
@@ -105,7 +101,7 @@ u_short Pkt::getType(){
     return ((ethernet_header *)(pkt_data))->type;
 }
 
-int Pkt::getIpLen(){
+int Pkt::getIpLen(){ // 0x45 4-IPV4 5-5*4=20
     return 4 * (((ipv4_header *)(pkt_data+sizeof(ethernet_header)))->ver_ihl & 0xF);
 }
 ip_address Pkt::getSrcIp(){
@@ -130,6 +126,7 @@ u_short Pkt::getDstPort(){
 QString Pkt::parseArp(){
     arp_content* content = (arp_content *)(pkt_data+sizeof(ethernet_header));
     QString ArpType;
+    QString info;
 
     switch(content->opcode){
     // 大端小端问题
@@ -161,12 +158,43 @@ QString Pkt::parseArp(){
     return info;
 }
 
-bool Pkt::parseQq(){
-    u_char *pByte = pkt_data + sizeof(ethernet_header) + getIpLen() + sizeof(udp_header);
-    if (*pByte == QQ_SIGN && (getSrcPort() == QQ_SER_PORT || getDstPort() == QQ_SER_PORT) ) {
-        qqNumber = *(int *)(pByte + QQ_NUM_OFFSET);
+#define OICQ_PROTO      (0x02)
+#define QQ_SER_PORT		(8000)		// QQ服务器所用端口号
+
+typedef struct oicq_packet{
+    //u_char flag; // 这里损失了一个字节做补充，因此长度出错 解决办法：去掉头部
+    u_short version;
+    u_short command;
+    u_short sequence; // 删除了上面的，这里还会补充一个u_short
+    u_int   number;// 4 bits
+}oicq_packet;
+// 按照结构体存放有字节对齐问题造成的字节填充问题
+#define VERSION_OFFSET   (1)
+#define COMMAND_OFFSET   (3)
+#define SEQUENCE_OFFSET  (5)
+#define NUMBER_OFFSET    (7)
+
+bool Pkt::isAboutQq(){
+    u_char* pByte = pkt_data + sizeof(ethernet_header) + getIpLen() + sizeof(udp_header);
+
+    if( (this->getType() == Pkt::IPV4 )
+       && (this->getIpProto()== Pkt::UDP)
+          && (*pByte == OICQ_PROTO)
+            && (getSrcPort() == QQ_SER_PORT || getDstPort() == QQ_SER_PORT)){
+        return true;
     }
-    qqNumber = ntohl(qqNumber);// 转换字节序
-    if (qqNumber == 0) return false;
-    return true;
+    else return false;
+}
+
+u_int Pkt::getOicqNum(){
+    return ntohl( *(u_int*) ( pkt_data + sizeof(ethernet_header) + getIpLen() + sizeof(udp_header) +NUMBER_OFFSET));
+    // IpLen must be 20.
+}
+
+u_short Pkt::getOicqCommand(){
+    return ntohs( *(u_short*) ( pkt_data + sizeof(ethernet_header) + getIpLen() + sizeof(udp_header) +COMMAND_OFFSET) );
+}
+
+u_short Pkt::getOicqVersion(){
+    return ntohs( *(u_short*) ( pkt_data + sizeof(ethernet_header) + getIpLen() + sizeof(udp_header) +VERSION_OFFSET) );
 }

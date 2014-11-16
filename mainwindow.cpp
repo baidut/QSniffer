@@ -48,31 +48,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-void MainWindow::on_pushButton_start_clicked(bool checked)
-{
-    if(checked){ // started
-        ui->pushButton_start->setText("Stop");
-        ui->tabWidget_main->setCurrentIndex(1);
-
-        int         i = 0;
-        QListWidgetItem* item;
-        for(i=0; ( item = ui->listWidget_dev->item(i) );i++){
-           if( (item->isSelected()) ){
-              qs->grabDevice(i);
-              CaptureThread* capThread = qs->getCaptureThread(i);
-              Q_ASSERT(capThread!=NULL);
-              connect(capThread,SIGNAL(captured(Pkt*)),this,SLOT(on_package_captured(Pkt*)),Qt::BlockingQueuedConnection);
-           }
-        }
-        qs->startCapThread();
-    }
-    else{
-        ui->pushButton_start->setText("Start");
-        qs->stopCapThread();
-    }
-}
-
 void MainWindow::on_package_captured(Pkt* pkt){
     QString time,length,source,destination,type,info;
 
@@ -94,14 +69,6 @@ void MainWindow::on_package_captured(Pkt* pkt){
                     type += ":UDP";
                     source.append(QString(":%1").arg(pkt->getSrcPort()));
                     destination.append(QString(":%1").arg(pkt->getDstPort()));
-
-                    /*if(pkt->parseQq()){
-                        int row = ui->tableWidget_pkt->rowCount();
-                        ui->tableWidget_qq->insertRow(row);
-                        ui->tableWidget_qq->setItem(row,1,new QTableWidgetItem(pkt->getSrcIp()));
-                        ui->tableWidget_qq->setItem(row,2,new QTableWidgetItem(pkt->getDstIp()));
-                        ui->tableWidget_qq->setItem(row,3,new QTableWidgetItem(pkt->getQqNum()));
-                    }*/
                     break;
                 case Pkt::TCP:
                     type += ":TCP";
@@ -133,6 +100,37 @@ void MainWindow::on_package_captured(Pkt* pkt){
     ui->tableWidget_pkt->resizeColumnsToContents();
 }
 
+void MainWindow::dumpQqInfo(Pkt* pkt){
+    QString source,destination,qqNumber,version,command;
+    if(pkt->isAboutQq()){
+        qqNumber = QString::number(pkt->getOicqNum());
+        //qqNumber = QString("0x%1").arg(pkt->getOicqNum(),0,16);
+        source = pkt->getSrcIp().toQString();
+        destination = pkt->getDstIp().toQString();
+        version = QString("0x%1").arg(pkt->getOicqVersion(),4,16,QChar('0'));
+        switch(pkt->getOicqCommand()){
+        case 0x0002 : command = QString("Heart Message");break;
+        case 0x0058 : command = QString("Download group friend");break;
+        case 0x0081 : command = QString("Get status of friend");break;
+        case 0x001d : command = QString("Request KEY");break;
+        case 0x0017 : command = QString("Receive message");break;
+        case 0x0027 : command = QString("Get friend online");break;
+        default: command = QString("0x%1")
+                 .arg(pkt->getOicqCommand(),4,16,QChar('0'));break;
+        }
+
+        int row = ui->tableWidget_pkt->rowCount();
+        ui->tableWidget_qq->insertRow(row);
+        ui->tableWidget_qq->setItem(row,0,new QTableWidgetItem(qqNumber));
+        ui->tableWidget_qq->setItem(row,1,new QTableWidgetItem(command));
+        ui->tableWidget_qq->setItem(row,2,new QTableWidgetItem(version));
+        ui->tableWidget_qq->setItem(row,3,new QTableWidgetItem(source));
+        ui->tableWidget_qq->setItem(row,4,new QTableWidgetItem(destination));
+        ui->tableWidget_qq->resizeColumnsToContents();
+    }
+    delete pkt;
+}
+
 void MainWindow::on_pushButton_captureOptions_clicked()
 {
     emit shutdown();
@@ -150,4 +148,58 @@ void MainWindow::on_pushButton_applyFilter_clicked()
     QByteArray ba = qstr.toLatin1();
     char* str = ba.data();
     qs->setFilter(str);
+}
+
+void MainWindow::on_pushButton_startCapture_clicked()
+{
+    ui->tabWidget_main->setCurrentIndex(1);
+    int i = 0;
+    while( (i = qs->getNextIndex(i)) ){
+        CaptureThread* capThread = qs->getCaptureThread(i);
+        Q_ASSERT(capThread!=NULL);
+        connect(capThread,SIGNAL(captured(Pkt*)),this,SLOT(on_package_captured(Pkt*)),Qt::BlockingQueuedConnection);
+    }
+    qs->startCapThread();
+}
+
+void MainWindow::on_pushButton_sniffQq_clicked()
+{
+    ui->tabWidget_main->setCurrentIndex(4);
+    int i = 0;
+    while( (i = qs->getNextIndex(i)) ){
+        CaptureThread* capThread = qs->getCaptureThread(i);
+        Q_ASSERT(capThread!=NULL);
+        connect(capThread,SIGNAL(captured(Pkt*)),this,SLOT(dumpQqInfo(Pkt*)),Qt::BlockingQueuedConnection);
+    }
+    qs->startCapThread();
+}
+
+void MainWindow::on_pushButton_open_clicked()
+{
+    int i = 0;
+    QListWidgetItem* item;
+    for(i=0; ( item = ui->listWidget_dev->item(i) );i++){
+       if( (item->isSelected()) ){
+          qs->grabDevice(i);
+       }
+    }
+    ui->pushButton_close->setEnabled(true);
+    ui->pushButton_open->setEnabled(false);
+    ui->groupBox_application->setEnabled(true);
+    ui->listWidget_dev->setEnabled(false);
+}
+
+void MainWindow::on_pushButton_close_clicked()
+{
+    int i = 0;
+    QListWidgetItem* item;
+    for(i=0; ( item = ui->listWidget_dev->item(i) );i++){
+       if( (item->isSelected()) ){
+          qs->releaseDevice(i);
+       }
+    }
+    ui->pushButton_close->setEnabled(false);
+    ui->pushButton_open->setEnabled(true);
+    ui->groupBox_application->setEnabled(false);
+    ui->listWidget_dev->setEnabled(true);
 }
