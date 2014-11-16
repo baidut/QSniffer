@@ -58,10 +58,10 @@ typedef struct ip_address{
 
     QString toQString(){
         return QString("%1.%2.%3.%4")
-                .arg(byte1)
-                .arg(byte2)
-                .arg(byte3)
-                .arg(byte4);
+                .arg(byte1,3,10,QChar(' '))
+                .arg(byte2,3,10,QChar(' '))
+                .arg(byte3,3,10,QChar(' '))
+                .arg(byte4,3,10,QChar(' '));
     }
     bool operator == (const struct ip_address& other) const{
        return       (byte1 == other.byte1)
@@ -77,6 +77,21 @@ typedef struct ip_address{
 class Pkt {
 
 public:
+    //0x 00 08 for 0x 08 00
+    //0x dd 86 for 0x 86 DD
+    // 字节大端对齐问题
+    typedef enum{
+        IPV6 = 0xDD86,
+        ARP = 0x0608,
+        IPV4 = 0x0008,
+    }ethType;
+    typedef enum{
+        IP,     ICMP,   IGMP,   GGP,    IP_ENCAP,
+        ST,     TCP,
+        EGP = 8,
+        UDP = 17,
+    }ipProto;
+
     Pkt(struct pcap_pkthdr *header,u_char *pkt_data,Nic* nic){
         this-> header = header;
         this-> pkt_data = pkt_data;
@@ -85,19 +100,16 @@ public:
     QString getTime();
     int     getLen()    { return header->len;}
     int     getCaplen() { return header->caplen;}
-    QString getType()   { return type;}
-    mac_address getSrcMac() { return srcMac;}
-    mac_address getDstMac() { return dstMac;}
-    ip_address  getSrcIp()  { return srcIp;}
-    ip_address  getDstIp()  { return dstIp;}
-    u_short getSrcPort(){ return sport;}
-    u_short getDstPort(){ return dport;}
-    QString getProto()  { return ip_proto;}
+    mac_address getSrcMac();
+    mac_address getDstMac();
+    u_short     getType();
+    ip_address  getSrcIp();
+    ip_address  getDstIp();
+    u_short getSrcPort();
+    int     getIpLen();
+    u_short getDstPort();
+    u_char  getIpProto();
     u_int   getQqNum()  { return qqNumber;}
-
-    void    unpackEthHeader();
-    void    unpackIpHeader();
-    void    unpackUdpHeader();
 
     bool    parseQq();
     QString parseArp();
@@ -109,15 +121,6 @@ public:
     QString mac2QSting(mac_address);
 
 private:
-
-    QString type;
-    mac_address srcMac;
-    mac_address dstMac;
-    ip_address  srcIp;
-    ip_address  dstIp;
-    QString ip_proto;
-    u_int   ip_len;
-    u_short sport,dport;
     u_int   qqNumber;
     QString info;
 
@@ -125,5 +128,7 @@ private:
     struct  pcap_pkthdr *header; // 头部有时间戳、捕捉长度和原始长度参数（当限制捕捉长度时两者不同）
     u_char* pkt_data;
 };
+
+
 
 #endif // PKT_H

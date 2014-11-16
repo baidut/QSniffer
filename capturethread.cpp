@@ -3,7 +3,6 @@
 #include <QObject>
 #include "nic.h"
 
-// 测试给主窗口发送数据包
 void CaptureThread::run(){
     Pkt* pkt = NULL;
     while(!isBreak){

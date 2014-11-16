@@ -62,7 +62,7 @@ void MainWindow::on_pushButton_start_clicked(bool checked)
               qs->grabDevice(i);
               CaptureThread* capThread = qs->getCaptureThread(i);
               Q_ASSERT(capThread!=NULL);
-              connect(capThread,SIGNAL(captured(Pkt*)),this,SLOT(on_package_captured(Pkt*)));
+              connect(capThread,SIGNAL(captured(Pkt*)),this,SLOT(on_package_captured(Pkt*)),Qt::BlockingQueuedConnection);
            }
         }
         qs->startCapThread();
@@ -79,34 +79,46 @@ void MainWindow::on_package_captured(Pkt* pkt){
     time = pkt->getTime();
     length = QString("%1/%2").arg(pkt->getLen()).arg(pkt->getCaplen());
 
-    pkt->unpackEthHeader();
-
-    type = pkt->getType();
-    if(type=="IPv4"){
-        pkt->unpackIpHeader();
-        source = pkt->getSrcIp().toQString();
-        destination = pkt->getDstIp().toQString();
-        type = pkt->getProto();
-        if(type == "udp"){
-            pkt->unpackUdpHeader();
-            source.append(QString(":%1").arg(pkt->getSrcPort()));
-            destination.append(QString(":%1").arg(pkt->getDstPort()));
-
-            /*if(pkt->parseQq()){
-                int row = ui->tableWidget_pkt->rowCount();
-                ui->tableWidget_qq->insertRow(row);
-                ui->tableWidget_qq->setItem(row,1,new QTableWidgetItem(pkt->getSrcIp()));
-                ui->tableWidget_qq->setItem(row,2,new QTableWidgetItem(pkt->getDstIp()));
-                ui->tableWidget_qq->setItem(row,3,new QTableWidgetItem(pkt->getQqNum()));
-            }*/
-        }
-        else if(type == "arp"){
-            info = pkt->parseArp();
-        }
+    source = pkt->getSrcMac().toQString();
+    destination = pkt->getDstMac().toQString();
+    if( (pkt->getDstMac()) == (mac_address){0xff,0xff,0xff,0xff,0xff,0xff}){
+        destination = "Broadcast";
     }
-    else {
-        source = pkt->getSrcMac().toQString();
-        destination = pkt->getDstMac().toQString();
+    switch(pkt->getType()){
+        case Pkt::IPV4:
+            type = "IPV4";
+            source = pkt->getSrcIp().toQString();
+            destination = pkt->getDstIp().toQString();
+            switch(pkt->getIpProto()){
+                case Pkt::UDP:
+                    type += ":UDP";
+                    source.append(QString(":%1").arg(pkt->getSrcPort()));
+                    destination.append(QString(":%1").arg(pkt->getDstPort()));
+
+                    /*if(pkt->parseQq()){
+                        int row = ui->tableWidget_pkt->rowCount();
+                        ui->tableWidget_qq->insertRow(row);
+                        ui->tableWidget_qq->setItem(row,1,new QTableWidgetItem(pkt->getSrcIp()));
+                        ui->tableWidget_qq->setItem(row,2,new QTableWidgetItem(pkt->getDstIp()));
+                        ui->tableWidget_qq->setItem(row,3,new QTableWidgetItem(pkt->getQqNum()));
+                    }*/
+                    break;
+                case Pkt::TCP:
+                    type += ":TCP";
+                    source.append(QString(":%1").arg(pkt->getSrcPort()));
+                    destination.append(QString(":%1").arg(pkt->getDstPort()));
+                    break;
+                default:
+                    break;
+            }
+            break;
+       case Pkt::ARP:
+            type = "ARP";
+            info = pkt->parseArp();
+            break;
+       default:
+            type = QString("Unkown:0x%1").arg(pkt->getType(),4,16,QChar('0'));//TODO注意这里需要倒序，大小端对齐问题
+            break;
     }
     delete pkt;// 释放内存
 
@@ -118,6 +130,7 @@ void MainWindow::on_package_captured(Pkt* pkt){
     ui->tableWidget_pkt->setItem(row,3,new QTableWidgetItem(type));
     ui->tableWidget_pkt->setItem(row,4,new QTableWidgetItem(length));
     ui->tableWidget_pkt->setItem(row,5,new QTableWidgetItem(info));
+    ui->tableWidget_pkt->resizeColumnsToContents();
 }
 
 void MainWindow::on_pushButton_captureOptions_clicked()
