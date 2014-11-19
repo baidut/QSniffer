@@ -27,7 +27,7 @@ class QSniffer :public QObject {
     Q_OBJECT
 
 public:
-    explicit QSniffer(QObject* parent = 0); ;
+    explicit QSniffer(QObject* parent = 0);
     ~QSniffer();
 
     QStringList& getDeviceList(){

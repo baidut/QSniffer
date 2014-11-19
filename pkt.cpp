@@ -1,8 +1,9 @@
 
 #include "pkt.h"
 #include <QByteArray>
+#ifdef WIN32
 #include <winsock2.h> // ntohs
-
+#endif
 // Mac头部（14字节）
 typedef struct {
     mac_address  dstMac;

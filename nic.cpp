@@ -25,7 +25,7 @@ Nic::Nic(pcap_if_t* dev,QObject *parent):QObject(parent){
 
     bool ret = this->open();
     Q_ASSERT(ret == true);
-    setFilter("arp and udp");// tcp and udp包太多，主窗口会失去响应。。。
+    //setFilter("arp and udp");// tcp and udp包太多，主窗口会失去响应。。。
 }
 
 char* Nic::getName(){
@@ -83,14 +83,17 @@ bool Nic::setFilter(const char* filter, int optimize){  //"tcp"
         // fprintf(stderr,"\nThis program works only on Ethernet networks.\n");
         return false;
     }*/
-
+// netmask参数指定本地网络的网络掩码，当不知道的时候可以设为0  这里在linux下编译不通过，故去掉error: 'struct in_addr' has no member named 'S_un'
+#ifndef WIN32
+    netmask=0;
+#else
     if (this-> dev-> addresses != NULL)
         /* 获取接口第一个地址的掩码 */
         netmask=((struct sockaddr_in *)(dev->addresses->netmask))->sin_addr.S_un.S_addr;
     else
         /* 如果这个接口没有地址，那么我们假设这个接口在C类网络中 */
         netmask=0xffffff;
-
+#endif
     if (pcap_compile(this-> adhandle, &(this-> fcode), filter , optimize, netmask) <0 ){
         return false;
     }

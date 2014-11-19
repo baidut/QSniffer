@@ -7,13 +7,15 @@ QSniffer::QSniffer(QObject* parent): QObject(parent){
     this-> dev_list = new QStringList;
     /* 获取本机网络设备列表 */
     pcap_if_t* d;
+    QString dev_info;
 
     if(pcap_findalldevs(&alldevs, errbuf) == -1){
         sprintf(errbuf,"Error in pcap_findalldevs: %s\n",errbuf);
         return;
     }
     for(d=alldevs; d; d=d->next){
-        *(this-> dev_list) << ( d->name );
+        dev_info = QString("%1[%2]").arg(d->name).arg((d->description)?(d->description):"No description available");
+        *(this-> dev_list) << dev_info;
         nic_list.append(NULL);//nic_list[i] = NULL;i++;
         capThread_list.append(NULL);
     }

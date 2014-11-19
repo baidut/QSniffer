@@ -16,6 +16,7 @@ QFile* logFile; // logFile->close();
 
 int main(int argc, char *argv[])
 {
+#ifdef QS_LOG
     qInstallMessageHandler(outputMessage);//注册MessageHandler
     logFile = new QFile("log.txt");
     bool ret = logFile->open(QIODevice::WriteOnly | QIODevice::Append);
@@ -24,7 +25,7 @@ int main(int argc, char *argv[])
     QTextStream log(logFile);
     log << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz, ") << "System Start.\r\n";
     logFile->flush();
-
+#endif
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
