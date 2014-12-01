@@ -45,6 +45,8 @@ public:
     void stopCapture();
     void startCapThread();  // 全部线程运行
     void stopCapThread(); // 全部线程终止 停止信号的发送 通过信号量实现
+    // void continueCapThread();
+    void killCapThread();
     void setActionOnCaptured(pkt_handler handler_function); // 封装后的包处理函数
     void setActionOnCaptured(pcap_handler handler_function); // 也可以不通过分发，直接设置
 

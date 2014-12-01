@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget_main">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -425,8 +425,29 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionStartCapture"/>
+   <addaction name="actionStopCapture"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionStartCapture">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>startCapture</string>
+   </property>
+   <property name="toolTip">
+    <string>开始采集</string>
+   </property>
+  </action>
+  <action name="actionStopCapture">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>stopCapture</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

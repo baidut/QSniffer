@@ -17,22 +17,26 @@ public:
     CaptureThread(Nic* nic){
         this->nic = nic;
         isBreak = false;
+        this->pause = new QMutex( QMutex::Recursive); // 可以多次封锁
     }
     ~CaptureThread();
+
+    void lock(){
+        this->pause->lock();
+    }
+    void unlock(){
+        this->pause->unlock();
+    }
+    void breakloop(){
+        isBreak = true;
+    }
 protected:
      void run();
-     void lock(){
-         this->pause.lock();
-     }
-     void unlock(){
-         this->pause.unlock();
-     }
-     void breakloop(){
-         isBreak = true;
-     }
+     // bool isLocked();
+
 private:
      Nic* nic;
-     QMutex pause;
+     QMutex* pause;
      bool isBreak;
 signals:
      void captured(Pkt* packet);

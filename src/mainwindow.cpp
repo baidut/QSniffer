@@ -160,6 +160,7 @@ void MainWindow::on_pushButton_startCapture_clicked()
         connect(capThread,SIGNAL(captured(Pkt*)),this,SLOT(on_package_captured(Pkt*)),Qt::BlockingQueuedConnection);
     }
     qs->startCapThread();
+    ui->actionStopCapture->setEnabled(true);
 }
 
 void MainWindow::on_pushButton_sniffQq_clicked()
@@ -172,6 +173,7 @@ void MainWindow::on_pushButton_sniffQq_clicked()
         connect(capThread,SIGNAL(captured(Pkt*)),this,SLOT(dumpQqInfo(Pkt*)),Qt::BlockingQueuedConnection);
     }
     qs->startCapThread();
+    ui->actionStopCapture->setEnabled(true);
 }
 
 void MainWindow::on_pushButton_open_clicked()
@@ -202,4 +204,18 @@ void MainWindow::on_pushButton_close_clicked()
     ui->pushButton_open->setEnabled(true);
     ui->groupBox_application->setEnabled(false);
     ui->listWidget_dev->setEnabled(true);
+}
+
+void MainWindow::on_actionStartCapture_triggered()
+{
+    qs->startCapThread();
+    ui->actionStartCapture->setEnabled(false);
+    ui->actionStopCapture->setEnabled(true);
+}
+
+void MainWindow::on_actionStopCapture_triggered()
+{
+    qs->stopCapThread();
+    ui->actionStartCapture->setEnabled(true);
+    ui->actionStopCapture->setEnabled(false);
 }
