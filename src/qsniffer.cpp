@@ -52,9 +52,6 @@ void QSniffer::startCapThread(){
 void QSniffer::stopCapThread(){
     for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
         capThread_list[i]->breakLoop();
-        while(!capThread_list[i]->isFinished());
-        delete (capThread_list[i]);
-        capThread_list[i] = NULL;
     }
 }
 

@@ -15,21 +15,18 @@ public:
     }*/
     CaptureThread(Nic* nic){
         this->nic = nic;
-        isBreak = false;
     }
     ~CaptureThread(){
-
+        this->disconnect();
     }
     void breakLoop(){
-        this->disconnect();
-        isBreak = true;
+        this->requestInterruption();
     }
 
 protected:
      void run();
 private:
      Nic* nic;
-     bool isBreak;
 signals:
      void captured(Pkt* packet);
 };
