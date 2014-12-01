@@ -34,17 +34,15 @@ QSniffer::~QSniffer(){
 
 void QSniffer::startCapThread(){
     for(int i = 0; i< capThread_list.size(); i++)if(capThread_list[i]){
-        if( capThread_list[i]->isRunning()) // 必然是被锁住了
-            capThread_list[i]->unlock();
-        else
-            capThread_list[i]->start();
+        capThread_list[i]->start();
     }
 }
 
 void QSniffer::stopCapThread(){
     for(int i = 0; i< capThread_list.size(); i++)if(capThread_list[i]){
-        Q_ASSERT(capThread_list[i]->isRunning());
-        capThread_list[i]->lock(); //delete capThread_list[i];
+        qDebug("delete capThread");
+        delete (capThread_list[i]);
+        capThread_list[i] = NULL; // 无法重新开始问题
     }
 }
 
