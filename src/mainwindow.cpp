@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->qs = new QSniffer;
+    this->qs = new QSniffer(this);
     QStringList dev_list = this->qs->getDeviceList();
     ui->listWidget_dev->addItems(dev_list);
 

@@ -33,16 +33,28 @@ QSniffer::~QSniffer(){
 }
 
 void QSniffer::startCapThread(){
-    for(int i = 0; i< capThread_list.size(); i++)if(capThread_list[i]){
+    for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
+        if(capThread_list[i]==NULL){
+            capThread_list[i]= new CaptureThread(nic_list[i]);
+            qDebug("new capThread");
+            // 需要重连信号
+            if(this->parent())
+                connect(capThread_list[i],SIGNAL(captured(Pkt*)),
+                        this->parent(),SLOT(on_package_captured(Pkt*)),
+                        Qt::BlockingQueuedConnection);
+            qDebug("connect compeleted.");
+        }
+        Q_ASSERT(capThread_list[i] != NULL);
         capThread_list[i]->start();
     }
 }
 
 void QSniffer::stopCapThread(){
-    for(int i = 0; i< capThread_list.size(); i++)if(capThread_list[i]){
-        qDebug("delete capThread");
+    for(int i = 0; i< nic_list.size(); i++)if(nic_list[i]){
+        capThread_list[i]->breakLoop();
+        while(!capThread_list[i]->isFinished());
         delete (capThread_list[i]);
-        capThread_list[i] = NULL; // 无法重新开始问题
+        capThread_list[i] = NULL;
     }
 }
 

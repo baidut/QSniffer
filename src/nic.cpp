@@ -62,6 +62,9 @@ Pkt* Nic::getNextPacket(){
     struct pcap_pkthdr *header;
     u_char *pkt_data;
     int res = pcap_next_ex( adhandle, &header, (const u_char**)&pkt_data);
+    if(res == -1) {
+        qDebug("Error in reading the packets:%s",pcap_geterr(adhandle));
+    }
     if(res != 1) return NULL; // 不能无线等待下一个数据包
     Pkt* pkt = new Pkt(header,pkt_data,this); // 内存分配可能比较费时间
     return pkt;

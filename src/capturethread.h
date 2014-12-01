@@ -18,11 +18,13 @@ public:
         isBreak = false;
     }
     ~CaptureThread(){
-        isBreak = true;
-        qDebug("break!");
-        this->disconnect();// 注意先要断开连接之后再等待结束，否则会死
-        this->wait();
+
     }
+    void breakLoop(){
+        this->disconnect();
+        isBreak = true;
+    }
+
 protected:
      void run();
 private:
